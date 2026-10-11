@@ -1,894 +1,611 @@
-// ============================================
-// GEOMETRY DASH: CUBE RUSH
-// Полный игровой JavaScript
-// ============================================
 
 "use strict";
 
-// ---------- ЭЛЕМЕНТЫ ----------
+const $ = (id) => document.getElementById(id);
 
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas ? canvas.getContext("2d") : null;
+const loadingScreen = $("loadingScreen");
+const mainMenu = $("mainMenu");
+const gameScreen = $("gameScreen");
+const canvas = $("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-const loadingScreen = document.getElementById("loadingScreen");
-const loadingBar = document.getElementById("loadingBar");
-const loadingPercent = document.getElementById("loadingPercent");
-
-const mainMenu = document.getElementById("mainMenu");
-const gameScreen = document.getElementById("gameScreen");
-
-const menu = mainMenu;
-const pauseMenu = document.getElementById("pauseMenu");
-const gameOverMenu = document.getElementById("gameOverMenu");
-const winMenu = document.getElementById("winMenu");
-const skinMenu = document.getElementById("skinMenu");
-const settingsMenu = document.getElementById("settingsMenu");
-
-const progressBar = document.getElementById("progressBar");
-const progressText = document.getElementById("progressText");
-
-const menuCube = document.getElementById("menuCube");
-const toast = document.getElementById("toast");
-
-// ---------- СОСТОЯНИЕ ИГРЫ ----------
+const pauseMenu = $("pauseMenu");
+const gameOverMenu = $("gameOverMenu");
+const winMenu = $("winMenu");
+const skinMenu = $("skinMenu");
+const settingsMenu = $("settingsMenu");
 
 let state = "loading";
-let animationId = null;
+let animationId = 0;
 let lastTime = 0;
+let toastTimer = null;
 
-let distance = 0;
-let score = 0;
-let speed = 5;
-
-let gravity = 0.8;
-let jumpPower = -9;
-
+let width = 0;
+let height = 0;
 let groundY = 0;
-let levelLength = 5000;
+
+let cube = {
+  x: 100,
+  y: 0,
+  size: 34,
+  vy: 0,
+  rotation: 0,
+  grounded: true
+};
 
 let obstacles = [];
-let particles = [];
+let distance = 0;
+let levelLength = 6500;
+let obstacleTimer = 0;
+let gameSpeed = 6.2;
+let skinColor = "#00eaff";
 
-let selectedSkin = "#00eaff";
+const GRAVITY = 0.58;
+const JUMP_POWER = -13.5;
 
 let soundEnabled = true;
 let musicEnabled = true;
-
 let audioContext = null;
-let toastTimeout = null;
 
-const player = {
-    x: 100,
-    y: 0,
-    size: 30,
-    vy: 0,
-    grounded: true,
-    rotation: 0
-};
-
-// ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
-
-function setDisplay(element, display) {
-    if (element) {
-        element.style.display = display;
-    }
+function setVisible(element, visible, display = "flex") {
+  if (element) element.style.display = visible ? display : "none";
 }
 
 function hideAllOverlays() {
-    [
-        pauseMenu,
-        gameOverMenu,
-        winMenu,
-        skinMenu,
-        settingsMenu
-    ].forEach(element => {
-        setDisplay(element, "none");
-    });
+  setVisible(pauseMenu, false);
+  setVisible(gameOverMenu, false);
+  setVisible(winMenu, false);
+  setVisible(skinMenu, false);
+  setVisible(settingsMenu, false);
 }
 
 function showToast(message) {
-    if (!toast) return;
+  const toast = $("toast");
+  toast.textContent = message;
+  setVisible(toast, true, "block");
 
-    toast.textContent = message;
-    toast.classList.add("show");
-
-    clearTimeout(toastTimeout);
-
-    toastTimeout = setTimeout(() => {
-        toast.classList.remove("show");
-    }, 2200);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => setVisible(toast, false), 2200);
 }
 
-function showMainMenu() {
-    stopGameLoop();
+function playTone(frequency = 440, duration = 0.09, type = "square", volume = 0.035) {
+  if (!soundEnabled) return;
 
-    state = "menu";
+  try {
+    audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
 
-    setDisplay(loadingScreen, "none");
-    setDisplay(mainMenu, "flex");
-    setDisplay(gameScreen, "none");
-
-    hideAllOverlays();
-
-    if (ctx) {
-        resizeCanvas();
-        draw();
+    if (audioContext.state === "suspended") {
+      audioContext.resume();
     }
-}
 
-function stopGameLoop() {
-    if (animationId !== null) {
-        cancelAnimationFrame(animationId);
-        animationId = null;
-    }
-}
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
 
-// ---------- ЗВУК ----------
-
-function playSound(frequency = 440, duration = 0.08) {
-    if (!soundEnabled) return;
-
-    try {
-        const AudioContextClass =
-            window.AudioContext || window.webkitAudioContext;
-
-        if (!AudioContextClass) return;
-
-        if (!audioContext) {
-            audioContext = new AudioContextClass();
-        }
-
-        if (audioContext.state === "suspended") {
-            audioContext.resume();
-        }
-
-        const oscillator = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-
-        oscillator.type = "square";
-        oscillator.frequency.value = frequency;
-
-        gain.gain.setValueAtTime(
-            0.06,
-            audioContext.currentTime
-        );
-
-        gain.gain.exponentialRampToValueAtTime(
-            0.001,
-            audioContext.currentTime + duration
-        );
-
-        oscillator.connect(gain);
-        gain.connect(audioContext.destination);
-
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + duration);
-    } catch (error) {
-        console.warn("Не удалось воспроизвести звук:", error);
-    }
-}
-
-// ---------- ЗАГРУЗКА ----------
-
-function startLoading() {
-    let progress = 0;
-
-    const loadingInterval = setInterval(() => {
-        progress += 5 + Math.random() * 12;
-        progress = Math.min(progress, 100);
-
-        if (loadingBar) {
-            loadingBar.style.width = `${progress}%`;
-        }
-
-        if (loadingPercent) {
-            loadingPercent.textContent =
-                `${Math.floor(progress)}%`;
-        }
-
-        if (progress >= 100) {
-            clearInterval(loadingInterval);
-
-            setTimeout(() => {
-                showMainMenu();
-            }, 250);
-        }
-    }, 90);
-}
-
-// ---------- РАЗМЕР ИГРОВОГО ПОЛЯ ----------
-
-function resizeCanvas() {
-    if (!canvas || !ctx) return;
-
-    const rect = canvas.getBoundingClientRect();
-
-    if (rect.width <= 0 || rect.height <= 0) return;
-
-    const dpr = Math.min(
-        window.devicePixelRatio || 1,
-        2
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+    gain.gain.setValueAtTime(volume, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(
+      0.001,
+      audioContext.currentTime + duration
     );
 
-    canvas.width = Math.floor(rect.width * dpr);
-    canvas.height = Math.floor(rect.height * dpr);
-
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    groundY = rect.height - 45;
-
-    if (state !== "playing" && state !== "paused") {
-        player.y = groundY - player.size;
-    }
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + duration);
+  } catch (error) {
+    // Игра продолжает работать, даже если звук недоступен.
+  }
 }
 
-// ---------- СОЗДАНИЕ УРОВНЯ ----------
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
 
-function createLevel() {
-    obstacles = [];
+  if (rect.width < 1 || rect.height < 1) return;
 
-    let x = 450;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  width = rect.width;
+  height = rect.height;
 
-    while (x < levelLength) {
-        x += 260 + Math.random() * 220;
+  canvas.width = Math.round(width * dpr);
+  canvas.height = Math.round(height * dpr);
 
-        obstacles.push({
-            x: x,
-            width: 30,
-            height: 35 + Math.random() * 15
-        });
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-        if (Math.random() > 0.7) {
-            x += 60;
+  groundY = height - 68;
 
-            obstacles.push({
-                x: x,
-                width: 30,
-                height: 35
-            });
-        }
-    }
+  if (cube.grounded) {
+    cube.y = groundY - cube.size;
+  } else {
+    cube.y = Math.min(cube.y, groundY - cube.size);
+  }
+
+  if (state !== "playing") draw();
 }
 
-// ---------- НАЧАЛО ИГРЫ ----------
+window.addEventListener("resize", resizeCanvas);
+
+function drawBackground() {
+  const gradient = ctx.createLinearGradient(0, 0, 0, height);
+  gradient.addColorStop(0, "#10143b");
+  gradient.addColorStop(1, "#080a1d");
+
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, height);
+
+  const gridSize = 42;
+  const offset = state === "playing" ? (distance * 0.35) % gridSize : 0;
+
+  ctx.strokeStyle = "rgba(0, 234, 255, 0.10)";
+  ctx.lineWidth = 1;
+
+  for (let x = -offset; x < width; x += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, groundY);
+    ctx.stroke();
+  }
+
+  for (let y = 15; y < groundY; y += gridSize) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = "rgba(0, 234, 255, 0.06)";
+  for (let i = 0; i < 8; i++) {
+    const x = (i * 173 - distance * 0.18) % (width + 120);
+    ctx.fillRect((x + width + 120) % (width + 120), 35 + i * 19, 3, 3);
+  }
+}
+
+function drawGround() {
+  ctx.fillStyle = "#101a3b";
+  ctx.fillRect(0, groundY, width, height - groundY);
+
+  ctx.fillStyle = "#00eaff";
+  ctx.fillRect(0, groundY, width, 4);
+
+  ctx.strokeStyle = "rgba(0, 234, 255, 0.22)";
+  ctx.lineWidth = 1;
+
+  const tile = 38;
+  const offset = state === "playing" ? (distance * 1.3) % tile : 0;
+
+  for (let x = -offset; x < width; x += tile) {
+    ctx.strokeRect(x, groundY + 9, tile, 23);
+  }
+}
+
+function drawCube() {
+  ctx.save();
+
+  const centerX = cube.x + cube.size / 2;
+  const centerY = cube.y + cube.size / 2;
+
+  ctx.translate(centerX, centerY);
+  ctx.rotate(cube.rotation);
+
+  ctx.shadowBlur = 18;
+  ctx.shadowColor = skinColor;
+  ctx.fillStyle = skinColor;
+  ctx.fillRect(-cube.size / 2, -cube.size / 2, cube.size, cube.size);
+
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2.5;
+  ctx.strokeRect(
+    -cube.size / 2 + 3,
+    -cube.size / 2 + 3,
+    cube.size - 6,
+    cube.size - 6
+  );
+
+  ctx.fillStyle = "#10143a";
+  ctx.fillRect(-9, -5, 5, 7);
+  ctx.fillRect(4, -5, 5, 7);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(-8, -4, 2, 3);
+  ctx.fillRect(5, -4, 2, 3);
+
+  ctx.restore();
+}
+
+function drawSpike(spike) {
+  ctx.save();
+
+  ctx.shadowBlur = 12;
+  ctx.shadowColor = "#ff397b";
+  ctx.fillStyle = "#ff397b";
+  ctx.strokeStyle = "#ffd3e1";
+  ctx.lineWidth = 1.5;
+
+  ctx.beginPath();
+  ctx.moveTo(spike.x, groundY);
+  ctx.lineTo(spike.x + spike.width / 2, groundY - spike.height);
+  ctx.lineTo(spike.x + spike.width, groundY);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function draw() {
+  if (!ctx || width < 1 || height < 1) return;
+
+  drawBackground();
+  drawGround();
+
+  for (const spike of obstacles) {
+    drawSpike(spike);
+  }
+
+  drawCube();
+}
 
 function resetGame() {
-    distance = 0;
-    score = 0;
-    speed = 5;
-    particles = [];
+  distance = 0;
+  obstacleTimer = 0;
+  obstacles = [];
+  gameSpeed = 6.2;
 
-    player.x = 100;
-    player.y = groundY - player.size;
-    player.vy = 0;
-    player.grounded = true;
-    player.rotation = 0;
+  cube.x = Math.max(55, Math.min(100, width * 0.18));
+  cube.y = groundY - cube.size;
+  cube.vy = 0;
+  cube.rotation = 0;
+  cube.grounded = true;
 
-    createLevel();
-    updateProgress();
+  updateProgress();
+  draw();
 }
 
-function startGame() {
-    stopGameLoop();
-
-    if (audioContext && audioContext.state === "suspended") {
-        audioContext.resume();
-    }
-
-    resizeCanvas();
-    resetGame();
-
-    state = "playing";
-
-    setDisplay(loadingScreen, "none");
-    setDisplay(mainMenu, "none");
-    setDisplay(gameScreen, "block");
-
-    hideAllOverlays();
-
-    lastTime = performance.now();
-
-    playSound(600, 0.1);
-
-    animationId = requestAnimationFrame(loop);
+function updateProgress() {
+  const percent = Math.min(100, Math.floor((distance / levelLength) * 100));
+  $("progressBar").style.width = percent + "%";
+  $("progressText").textContent = percent + "%";
 }
 
-// ---------- ПРЫЖОК ----------
+function spawnObstacleGroup() {
+  const startX = width + 25;
+  const spikeWidth = 34;
+  const spikeHeight = 38 + Math.random() * 4;
+
+  // Двойные и тройные шипы появляются не слишком часто.
+  const roll = Math.random();
+  let count = 1;
+
+  if (roll > 0.66) count = 2;
+  if (roll > 0.91) count = 3;
+
+  const gap = 30;
+
+  for (let i = 0; i < count; i++) {
+    obstacles.push({
+      x: startX + i * (spikeWidth + gap),
+      width: spikeWidth,
+      height: spikeHeight
+    });
+  }
+
+  // Достаточно времени для подготовки к следующей группе.
+  obstacleTimer = 78 + Math.random() * 40;
+}
 
 function jump() {
-    if (state !== "playing") return;
-    if (!player.grounded) return;
+  if (state !== "playing") return;
 
-    player.vy = jumpPower;
-    player.grounded = false;
-
-    playSound(520, 0.07);
-
-    for (let i = 0; i < 5; i++) {
-        particles.push({
-            x: player.x + player.size / 2,
-            y: groundY - 3,
-            vx: (Math.random() - 0.5) * 3,
-            vy: -Math.random() * 3,
-            life: 1
-        });
-    }
+  if (cube.grounded) {
+    cube.vy = JUMP_POWER;
+    cube.grounded = false;
+    playTone(540, 0.08, "square", 0.025);
+  }
 }
 
-// ---------- ПАУЗА ----------
+function isColliding(spike) {
+  // Немного уменьшаем хитбоксы, чтобы столкновения ощущались честнее.
+  const playerLeft = cube.x + 5;
+  const playerRight = cube.x + cube.size - 5;
+  const playerTop = cube.y + 5;
+  const playerBottom = cube.y + cube.size - 2;
 
-function pauseGame() {
-    if (state !== "playing") return;
+  const spikeLeft = spike.x + 5;
+  const spikeRight = spike.x + spike.width - 5;
+  const spikeTop = groundY - spike.height + 10;
 
-    state = "paused";
-    stopGameLoop();
+  const overlapsX = playerRight > spikeLeft && playerLeft < spikeRight;
+  const overlapsY = playerBottom > spikeTop;
 
-    setDisplay(pauseMenu, "flex");
-
-    playSound(300, 0.1);
+  return overlapsX && overlapsY;
 }
-
-function resumeGame() {
-    if (state !== "paused") return;
-
-    state = "playing";
-
-    setDisplay(pauseMenu, "none");
-
-    lastTime = performance.now();
-    animationId = requestAnimationFrame(loop);
-}
-
-// ---------- ЗАВЕРШЕНИЕ ИГРЫ ----------
 
 function gameOver() {
-    if (state !== "playing") return;
+  if (state !== "playing") return;
 
-    state = "gameover";
-    stopGameLoop();
-
-    setDisplay(gameOverMenu, "flex");
-
-    playSound(160, 0.2);
+  state = "gameover";
+  playTone(130, 0.35, "sawtooth", 0.05);
+  setVisible(gameOverMenu, true);
 }
 
 function winGame() {
-    if (state !== "playing") return;
+  if (state !== "playing") return;
 
-    state = "won";
-    stopGameLoop();
-
-    updateProgress();
-    setDisplay(winMenu, "flex");
-
-    playSound(800, 0.15);
-
-    setTimeout(() => {
-        if (state === "won") {
-            playSound(1000, 0.2);
-        }
-    }, 150);
+  state = "won";
+  playTone(700, 0.18, "sine", 0.05);
+  setTimeout(() => playTone(900, 0.22, "sine", 0.05), 130);
+  setVisible(winMenu, true);
 }
-
-// ---------- ПРОГРЕСС УРОВНЯ ----------
-
-function updateProgress() {
-    const progress = Math.min(
-        100,
-        Math.floor((distance / levelLength) * 100)
-    );
-
-    if (progressBar) {
-        progressBar.style.width = `${progress}%`;
-    }
-
-    if (progressText) {
-        progressText.textContent = `${progress}%`;
-    }
-}
-
-// ---------- ОБНОВЛЕНИЕ ИГРЫ ----------
 
 function update(delta) {
-    const frameScale = Math.min(delta / 16.67, 2);
+  const dt = Math.min(delta / 16.67, 2);
 
-    distance += speed * frameScale;
-    score = Math.floor(distance / 10);
+  distance += gameSpeed * dt;
+  obstacleTimer -= dt;
 
-    // Физика кубика
-    player.vy += gravity * frameScale;
-    player.y += player.vy * frameScale;
+  if (obstacleTimer <= 0) {
+    spawnObstacleGroup();
+  }
 
-    if (player.y + player.size >= groundY) {
-        player.y = groundY - player.size;
-        player.vy = 0;
-        player.grounded = true;
-        player.rotation = 0;
-    } else {
-        player.grounded = false;
-        player.rotation += 0.08 * frameScale;
+  for (const spike of obstacles) {
+    spike.x -= gameSpeed * dt;
+  }
+
+  obstacles = obstacles.filter((spike) => spike.x + spike.width > -20);
+
+  cube.vy += GRAVITY * dt;
+  cube.y += cube.vy * dt;
+
+  if (cube.y + cube.size >= groundY) {
+    cube.y = groundY - cube.size;
+    cube.vy = 0;
+    cube.grounded = true;
+  } else {
+    cube.grounded = false;
+  }
+
+  if (cube.grounded) {
+    cube.rotation = Math.round(cube.rotation / (Math.PI / 2)) * (Math.PI / 2);
+  } else {
+    cube.rotation += 0.085 * dt;
+  }
+
+  for (const spike of obstacles) {
+    if (isColliding(spike)) {
+      gameOver();
+      return;
     }
+  }
 
-    // Проверка столкновений
-    for (const obstacle of obstacles) {
-        const obstacleX =
-            obstacle.x - distance + player.x;
+  updateProgress();
 
-        if (
-            obstacleX < -50 ||
-            obstacleX > canvas.clientWidth + 50
-        ) {
-            continue;
-        }
+  if (distance >= levelLength) {
+    winGame();
+  }
+}
 
-        const playerLeft = player.x + 5;
-        const playerRight =
-            player.x + player.size - 5;
+function gameLoop(time) {
+  if (state !== "playing") {
+    animationId = 0;
+    return;
+  }
 
-        const playerTop = player.y + 5;
-        const playerBottom =
-            player.y + player.size - 2;
+  const delta = lastTime ? time - lastTime : 16.67;
+  lastTime = time;
 
-        const obstacleTop =
-            groundY - obstacle.height;
+  update(delta);
+  draw();
 
-        const overlaps =
-            playerRight > obstacleX + 4 &&
-            playerLeft < obstacleX + obstacle.width - 4 &&
-            playerBottom > obstacleTop + 5 &&
-            playerTop < groundY;
+  if (state === "playing") {
+    animationId = requestAnimationFrame(gameLoop);
+  } else {
+    animationId = 0;
+  }
+}
 
-        if (overlaps) {
-            gameOver();
-            return;
-        }
+function stopGameLoop() {
+  if (animationId) {
+    cancelAnimationFrame(animationId);
+    animationId = 0;
+  }
+}
+
+function startGame() {
+  stopGameLoop();
+  hideAllOverlays();
+
+  setVisible(loadingScreen, false);
+  setVisible(mainMenu, false);
+  setVisible(gameScreen, true, "block");
+
+  state = "playing";
+
+  // Сначала показываем игровую область, затем измеряем canvas.
+  resizeCanvas();
+  resetGame();
+
+  lastTime = performance.now();
+  animationId = requestAnimationFrame(gameLoop);
+}
+
+function showMainMenu() {
+  stopGameLoop();
+  state = "menu";
+
+  hideAllOverlays();
+  setVisible(gameScreen, false);
+  setVisible(loadingScreen, false);
+  setVisible(mainMenu, true, "flex");
+
+  $("menuCube").style.backgroundColor = skinColor;
+}
+
+function pauseGame() {
+  if (state !== "playing") return;
+
+  state = "paused";
+  stopGameLoop();
+  setVisible(pauseMenu, true);
+}
+
+function resumeGame() {
+  if (state !== "paused") return;
+
+  hideAllOverlays();
+  state = "playing";
+  lastTime = performance.now();
+  animationId = requestAnimationFrame(gameLoop);
+}
+
+function openFullscreen() {
+  const target = document.documentElement;
+
+  if (document.fullscreenElement) {
+    if (document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {
+        showToast("Не удалось выйти из полного экрана");
+      });
     }
+    return;
+  }
 
-    // Частицы прыжка
-    particles.forEach(particle => {
-        particle.x += particle.vx * frameScale;
-        particle.y += particle.vy * frameScale;
+  if (target.requestFullscreen) {
+    target.requestFullscreen().then(() => {
+      showToast("Полный экран включён!");
+    }).catch(() => {
+      showToast("Полный экран не поддерживается браузером");
+    });
+  } else {
+    showToast("Нажми меню браузера и выбери «На весь экран»");
+  }
+}
 
-        particle.vy += 0.15 * frameScale;
-        particle.life -= 0.025 * frameScale;
+function updateFullscreenButton() {
+  const button = $("fullscreenButton");
+  if (!button) return;
+
+  button.innerHTML = document.fullscreenElement
+    ? "<span>⛶</span> ВЫЙТИ ИЗ ПОЛНОГО ЭКРАНА"
+    : "<span>⛶</span> ПОЛНЫЙ ЭКРАН";
+}
+
+$("playButton").addEventListener("click", startGame);
+$("fullscreenButton").addEventListener("click", openFullscreen);
+
+document.addEventListener("fullscreenchange", () => {
+  updateFullscreenButton();
+  setTimeout(resizeCanvas, 100);
+});
+
+$("menuButton").addEventListener("click", showMainMenu);
+$("pauseButton").addEventListener("click", pauseGame);
+$("resumeButton").addEventListener("click", resumeGame);
+
+$("pauseRestartButton").addEventListener("click", startGame);
+$("retryButton").addEventListener("click", startGame);
+$("winRestartButton").addEventListener("click", startGame);
+
+$("pauseHomeButton").addEventListener("click", showMainMenu);
+$("gameOverHomeButton").addEventListener("click", showMainMenu);
+$("winHomeButton").addEventListener("click", showMainMenu);
+
+$("skinButton").addEventListener("click", () => {
+  setVisible(skinMenu, true);
+});
+
+$("closeSkinButton").addEventListener("click", () => {
+  setVisible(skinMenu, false);
+});
+
+document.querySelectorAll(".skin-option").forEach((button) => {
+  button.addEventListener("click", () => {
+    skinColor = button.dataset.skin;
+
+    document.querySelectorAll(".skin-option").forEach((item) => {
+      item.classList.remove("selected");
     });
 
-    particles = particles.filter(
-        particle => particle.life > 0
-    );
-
-    updateProgress();
-
-    if (distance >= levelLength) {
-        winGame();
-    }
-}
-
-// ---------- ОТРИСОВКА ФОНА ----------
-
-function drawBackground() {
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-
-    const gradient = ctx.createLinearGradient(
-        0, 0, 0, height
-    );
-
-    gradient.addColorStop(0, "#15153b");
-    gradient.addColorStop(1, "#30306b");
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-
-    // Сетка
-    ctx.strokeStyle = "rgba(255,255,255,0.08)";
-    ctx.lineWidth = 1;
-
-    const gridSize = 40;
-    const offset = distance % gridSize;
-
-    for (let x = -offset; x < width; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, groundY);
-        ctx.stroke();
-    }
-
-    for (let y = 0; y < groundY; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(width, y);
-        ctx.stroke();
-    }
-
-    // Земля
-    ctx.fillStyle = "#242452";
-    ctx.fillRect(
-        0,
-        groundY,
-        width,
-        height - groundY
-    );
-
-    ctx.fillStyle = "#00f5ff";
-    ctx.fillRect(0, groundY, width, 4);
-}
-
-// ---------- ОТРИСОВКА ШИПОВ ----------
-
-function drawObstacles() {
-    for (const obstacle of obstacles) {
-        const x = obstacle.x - distance + player.x;
-
-        if (
-            x < -50 ||
-            x > canvas.clientWidth + 50
-        ) {
-            continue;
-        }
-
-        ctx.fillStyle = "#ff3d81";
-
-        ctx.beginPath();
-        ctx.moveTo(x, groundY);
-
-        ctx.lineTo(
-            x + obstacle.width / 2,
-            groundY - obstacle.height
-        );
-
-        ctx.lineTo(
-            x + obstacle.width,
-            groundY
-        );
-
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-    }
-}
-
-// ---------- ОТРИСОВКА КУБИКА ----------
-
-function drawPlayer() {
-    ctx.save();
-
-    ctx.translate(
-        player.x + player.size / 2,
-        player.y + player.size / 2
-    );
-
-    ctx.rotate(player.rotation);
-
-    ctx.shadowColor = selectedSkin;
-    ctx.shadowBlur = 12;
-
-    ctx.fillStyle = selectedSkin;
-
-    ctx.fillRect(
-        -player.size / 2,
-        -player.size / 2,
-        player.size,
-        player.size
-    );
-
-    ctx.shadowBlur = 0;
-
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 3;
-
-    ctx.strokeRect(
-        -player.size / 2,
-        -player.size / 2,
-        player.size,
-        player.size
-    );
-
-    // Глаза
-    ctx.fillStyle = "#17203f";
-
-    ctx.fillRect(-8, -5, 5, 7);
-    ctx.fillRect(3, -5, 5, 7);
-
-    // Рот
-    ctx.fillRect(-5, 7, 10, 3);
-
-    ctx.restore();
-}
-
-// ---------- ЧАСТИЦЫ ----------
-
-function drawParticles() {
-    for (const particle of particles) {
-        ctx.globalAlpha = particle.life;
-        ctx.fillStyle = selectedSkin;
-
-        ctx.fillRect(
-            particle.x,
-            particle.y,
-            5,
-            5
-        );
-    }
-
-    ctx.globalAlpha = 1;
-}
-
-// ---------- СЧЁТ ----------
-
-function drawScore() {
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 20px Arial";
-    ctx.textAlign = "left";
-
-    ctx.fillText(`Счёт: ${score}`, 16, 30);
-}
-
-// ---------- ОТРИСОВКА ИГРЫ ----------
-
-function draw() {
-    if (!canvas || !ctx) return;
-
-    if (
-        canvas.clientWidth <= 0 ||
-        canvas.clientHeight <= 0
-    ) {
-        return;
-    }
-
-    drawBackground();
-    drawObstacles();
-    drawParticles();
-    drawPlayer();
-    drawScore();
-}
-
-// ---------- ИГРОВОЙ ЦИКЛ ----------
-
-function loop(timestamp) {
-    if (state !== "playing") {
-        animationId = null;
-        return;
-    }
-
-    const delta = lastTime
-        ? timestamp - lastTime
-        : 16.67;
-
-    lastTime = timestamp;
-
-    update(delta);
+    button.classList.add("selected");
+    $("menuCube").style.backgroundColor = skinColor;
     draw();
+    playTone(650, 0.07, "sine");
+  });
+});
+
+$("settingsButton").addEventListener("click", () => {
+  setVisible(settingsMenu, true);
+});
+
+$("closeSettingsButton").addEventListener("click", () => {
+  setVisible(settingsMenu, false);
+});
+
+$("soundToggle").addEventListener("click", () => {
+  soundEnabled = !soundEnabled;
+  $("soundToggle").textContent = "ЗВУК: " + (soundEnabled ? "ВКЛ" : "ВЫКЛ");
+  if (soundEnabled) playTone(600, 0.08);
+});
+
+$("musicToggle").addEventListener("click", () => {
+  musicEnabled = !musicEnabled;
+  $("musicToggle").textContent = "МУЗЫКА: " + (musicEnabled ? "ВКЛ" : "ВЫКЛ");
+  showToast(musicEnabled ? "Музыка включена в настройках" : "Музыка выключена");
+});
+
+$("editorButton").addEventListener("click", () => {
+  showToast("Редактор уровней появится в будущем!");
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.code === "Space" || event.code === "ArrowUp" || event.code === "KeyW") {
+    event.preventDefault();
 
     if (state === "playing") {
-        animationId = requestAnimationFrame(loop);
-    } else {
-        animationId = null;
-        draw();
+      jump();
+    } else if (state === "paused") {
+      resumeGame();
     }
-}
+  }
 
-// ---------- ВЫБОР СКИНА ----------
+  if (event.code === "Escape" && state === "playing" && !document.fullscreenElement) {
+    pauseGame();
+  }
+});
 
-function updateSkinPreview() {
-    if (menuCube) {
-        menuCube.style.backgroundColor = selectedSkin;
-        menuCube.style.boxShadow =
-            `0 0 22px ${selectedSkin}`;
+canvas.addEventListener("pointerdown", (event) => {
+  event.preventDefault();
+  jump();
+});
+
+canvas.addEventListener("contextmenu", (event) => event.preventDefault());
+
+function startLoading() {
+  let progress = 0;
+  const bar = $("loadingBar");
+  const percent = $("loadingPercent");
+
+  const timer = setInterval(() => {
+    progress += 5 + Math.random() * 12;
+    progress = Math.min(progress, 100);
+
+    bar.style.width = progress + "%";
+    percent.textContent = Math.floor(progress) + "%";
+
+    if (progress >= 100) {
+      clearInterval(timer);
+      setTimeout(() => {
+        setVisible(loadingScreen, false);
+        setVisible(mainMenu, true, "flex");
+        state = "menu";
+        updateFullscreenButton();
+      }, 250);
     }
+  }, 75);
 }
 
-function selectSkin(color, button) {
-    selectedSkin = color;
-
-    document.querySelectorAll(".skin-option").forEach(option => {
-        option.classList.remove("selected");
-    });
-
-    if (button) {
-        button.classList.add("selected");
-    }
-
-    updateSkinPreview();
-
-    playSound(600, 0.08);
-}
-
-// ---------- НАСТРОЙКИ ----------
-
-function openSettings() {
-    hideAllOverlays();
-    setDisplay(settingsMenu, "flex");
-}
-
-function closeSettings() {
-    setDisplay(settingsMenu, "none");
-}
-
-function openSkins() {
-    hideAllOverlays();
-    setDisplay(skinMenu, "flex");
-}
-
-function closeSkins() {
-    setDisplay(skinMenu, "none");
-}
-
-// ---------- КНОПКИ ----------
-
-function bindButton(id, callback) {
-    const button = document.getElementById(id);
-
-    if (!button) {
-        console.warn(`Кнопка не найдена: ${id}`);
-        return;
-    }
-
-    button.addEventListener("click", event => {
-        event.preventDefault();
-        callback();
-    });
-}
-
-function bindControls() {
-    // Главное меню
-    bindButton("playButton", startGame);
-    bindButton("skinButton", openSkins);
-    bindButton("settingsButton", openSettings);
-
-    // Редактор пока не готов
-    bindButton("editorButton", () => {
-        showToast("Редактор уровней скоро появится!");
-        playSound(300, 0.08);
-    });
-
-    // Пауза
-    bindButton("pauseButton", pauseGame);
-    bindButton("resumeButton", resumeGame);
-
-    bindButton("pauseRestartButton", startGame);
-
-    bindButton("pauseHomeButton", showMainMenu);
-
-    // Поражение
-    bindButton("retryButton", startGame);
-    bindButton("gameOverHomeButton", showMainMenu);
-
-    // Победа
-    bindButton("winRestartButton", startGame);
-    bindButton("winHomeButton", showMainMenu);
-
-    // Выбор скина
-    bindButton("closeSkinButton", closeSkins);
-
-    document.querySelectorAll(".skin-option").forEach(button => {
-        button.addEventListener("click", () => {
-            selectSkin(
-                button.dataset.skin,
-                button
-            );
-        });
-    });
-
-    // Настройки
-    bindButton("closeSettingsButton", closeSettings);
-
-    const soundToggle = document.getElementById("soundToggle");
-    const musicToggle = document.getElementById("musicToggle");
-
-    if (soundToggle) {
-        soundToggle.checked = soundEnabled;
-
-        soundToggle.addEventListener("change", () => {
-            soundEnabled = soundToggle.checked;
-
-            if (soundEnabled) {
-                playSound(600, 0.08);
-            }
-        });
-    }
-
-    if (musicToggle) {
-        musicToggle.checked = musicEnabled;
-
-        musicToggle.addEventListener("change", () => {
-            musicEnabled = musicToggle.checked;
-
-            showToast(
-                musicEnabled
-                    ? "Музыка включена"
-                    : "Музыка выключена"
-            );
-        });
-    }
-}
-
-// ---------- КЛАВИАТУРА ----------
-
-function bindKeyboard() {
-    window.addEventListener("keydown", event => {
-        if (
-            event.code === "Space" ||
-            event.code === "ArrowUp" ||
-            event.code === "KeyW"
-        ) {
-            event.preventDefault();
-
-            if (state === "menu") {
-                startGame();
-            } else if (state === "playing") {
-                jump();
-            } else if (state === "paused") {
-                resumeGame();
-            }
-        }
-
-        if (
-            event.code === "Escape" ||
-            event.code === "KeyP"
-        ) {
-            if (state === "playing") {
-                pauseGame();
-            } else if (state === "paused") {
-                resumeGame();
-            } else if (skinMenu && skinMenu.style.display !== "none") {
-                closeSkins();
-            } else if (
-                settingsMenu &&
-                settingsMenu.style.display !== "none"
-            ) {
-                closeSettings();
-            }
-        }
-    });
-}
-
-// ---------- УПРАВЛЕНИЕ НА ТЕЛЕФОНЕ ----------
-
-function bindTouchControls() {
-    if (!canvas) return;
-
-    canvas.addEventListener("pointerdown", event => {
-        if (state === "playing") {
-            event.preventDefault();
-            jump();
-        }
-    });
-}
-
-// ---------- ЗАПУСК ----------
-
-function init() {
-    if (!canvas || !ctx) {
-        console.error(
-            'Не найден canvas с id="gameCanvas". Проверь index.html.'
-        );
-
-        showToast("Ошибка: игровое поле не найдено");
-        return;
-    }
-
-    resizeCanvas();
-
-    bindControls();
-    bindKeyboard();
-    bindTouchControls();
-
-    updateSkinPreview();
-
-    window.addEventListener("resize", () => {
-        resizeCanvas();
-        draw();
-    });
-
-    startLoading();
-}
-
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-} else {
-    init();
-}
+setVisible(loadingScreen, true, "flex");
+setVisible(mainMenu, false);
+setVisible(gameScreen, false);
+resizeCanvas();
+startLoading();
