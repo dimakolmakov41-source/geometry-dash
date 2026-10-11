@@ -12,8 +12,11 @@ let lastTime = 0;
 let distance = 0;
 let score = 0;
 let speed = 5;
-let gravity = 0.65;
-let jumpPower = -12;
+
+// ИЗМЕНЕНО: прыжок ниже, гравитация сильнее
+let gravity = 0.8;
+let jumpPower = -9;
+
 let obstacles = [];
 let particles = [];
 
@@ -87,6 +90,7 @@ function createLevel() {
 
         if (Math.random() > 0.7) {
             x += 60;
+
             obstacles.push({
                 x,
                 width: 30,
@@ -142,13 +146,21 @@ function winGame() {
 }
 
 function updateProgress() {
-    const progress = Math.min(100, Math.floor(distance / levelLength * 100));
+    const progress = Math.min(
+        100,
+        Math.floor(distance / levelLength * 100)
+    );
 
     const progressBar = document.getElementById("progressBar");
     const progressText = document.getElementById("progressText");
 
-    if (progressBar) progressBar.style.width = `${progress}%`;
-    if (progressText) progressText.textContent = `${progress}%`;
+    if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+    }
+
+    if (progressText) {
+        progressText.textContent = `${progress}%`;
+    }
 }
 
 function update(delta) {
@@ -173,7 +185,10 @@ function update(delta) {
     for (const obstacle of obstacles) {
         const obstacleX = obstacle.x - distance + player.x;
 
-        if (obstacleX < -50 || obstacleX > canvas.clientWidth + 50) {
+        if (
+            obstacleX < -50 ||
+            obstacleX > canvas.clientWidth + 50
+        ) {
             continue;
         }
 
@@ -245,12 +260,20 @@ function drawObstacles() {
     for (const obstacle of obstacles) {
         const x = obstacle.x - distance + player.x;
 
-        if (x < -50 || x > canvas.clientWidth + 50) continue;
+        if (
+            x < -50 ||
+            x > canvas.clientWidth + 50
+        ) {
+            continue;
+        }
 
         ctx.fillStyle = "#ff3d81";
         ctx.beginPath();
         ctx.moveTo(x, groundY);
-        ctx.lineTo(x + obstacle.width / 2, groundY - obstacle.height);
+        ctx.lineTo(
+            x + obstacle.width / 2,
+            groundY - obstacle.height
+        );
         ctx.lineTo(x + obstacle.width, groundY);
         ctx.closePath();
         ctx.fill();
@@ -281,6 +304,7 @@ function drawPlayer() {
 
     ctx.strokeStyle = "#ffffff";
     ctx.lineWidth = 3;
+
     ctx.strokeRect(
         -player.size / 2,
         -player.size / 2,
@@ -313,7 +337,10 @@ function loop(timestamp) {
         return;
     }
 
-    const delta = lastTime ? timestamp - lastTime : 16.67;
+    const delta = lastTime
+        ? timestamp - lastTime
+        : 16.67;
+
     lastTime = timestamp;
 
     update(delta);
@@ -339,7 +366,6 @@ function bindButton(id, callback) {
 }
 
 function bindControls() {
-    // Поддерживаем несколько распространённых названий ID кнопки запуска.
     bindButton("playButton", startGame);
     bindButton("startButton", startGame);
     bindButton("playBtn", startGame);
@@ -361,10 +387,7 @@ function bindControls() {
     bindButton("retryButton", startGame);
     bindButton("retryBtn", startGame);
 
-    // Если кнопка запуска имеет текст «Играть», находим её и по тексту.
-    const buttons = document.querySelectorAll("button");
-
-    buttons.forEach(button => {
+    document.querySelectorAll("button").forEach(button => {
         const text = button.textContent.trim().toLowerCase();
 
         if (
@@ -396,7 +419,10 @@ function bindKeyboard() {
             }
         }
 
-        if (event.code === "Escape" || event.code === "KeyP") {
+        if (
+            event.code === "Escape" ||
+            event.code === "KeyP"
+        ) {
             togglePause();
         }
     });
