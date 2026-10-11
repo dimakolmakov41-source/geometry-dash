@@ -1,0 +1,379 @@
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+    color-scheme: dark;
+    --cyan: #00f5ff;
+    --pink: #ff3e9d;
+    --purple: #a855f7;
+    --bg: #090918;
+}
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+    background: var(--bg);
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow: hidden;
+}
+
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overscroll-behavior: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.game {
+    width: min(100%, 1200px);
+    padding: 14px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+}
+
+.logo {
+    font-size: clamp(15px, 2.4vw, 24px);
+    font-weight: 1000;
+    font-style: italic;
+    letter-spacing: -1px;
+    white-space: nowrap;
+    text-shadow: 0 0 14px rgba(0, 245, 255, 0.3);
+}
+
+.logo span {
+    color: var(--cyan);
+    margin-left: 5px;
+}
+
+.stats {
+    display: flex;
+    align-items: center;
+    gap: clamp(10px, 3vw, 28px);
+    font-size: clamp(9px, 1.5vw, 12px);
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: #9da5d4;
+}
+
+.stats b {
+    color: white;
+    margin-left: 5px;
+    font-size: 1.25em;
+}
+
+.sound-button {
+    width: 40px;
+    height: 36px;
+    flex-shrink: 0;
+    border: 1px solid #33365c;
+    border-radius: 10px;
+    background: #17172f;
+    color: var(--cyan);
+    font-size: 21px;
+}
+
+.sound-button.muted {
+    color: #777995;
+}
+
+.stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1000 / 450;
+    overflow: hidden;
+    background: #10112c;
+    border: 1px solid rgba(0, 245, 255, 0.45);
+    border-radius: 12px;
+    box-shadow:
+        0 0 35px rgba(0, 245, 255, 0.08),
+        0 0 80px rgba(168, 85, 247, 0.06);
+    touch-action: none;
+}
+
+#gameCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    touch-action: none;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    text-align: center;
+    background: rgba(8, 8, 25, 0.76);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.eyebrow {
+    color: var(--cyan);
+    font-size: clamp(9px, 1.6vw, 13px);
+    font-weight: 900;
+    letter-spacing: 5px;
+    margin-bottom: 7px;
+}
+
+.overlay h1 {
+    font-size: clamp(34px, 8vw, 76px);
+    line-height: 0.88;
+    font-weight: 1000;
+    font-style: italic;
+    letter-spacing: -2px;
+    text-shadow: 0 0 25px rgba(0, 245, 255, 0.2);
+}
+
+.overlay h1 span {
+    color: var(--cyan);
+}
+
+.overlay h2 {
+    font-size: clamp(20px, 4.5vw, 43px);
+    font-weight: 1000;
+    font-style: italic;
+}
+
+.overlay p {
+    color: #c2c6e9;
+    font-size: clamp(10px, 2vw, 16px);
+    margin-top: 10px;
+    margin-bottom: 18px;
+}
+
+.danger {
+    color: var(--pink);
+    text-shadow: 0 0 20px rgba(255, 62, 157, 0.3);
+}
+
+.success {
+    color: var(--cyan);
+    text-shadow: 0 0 20px rgba(0, 245, 255, 0.35);
+}
+
+.play-button {
+    min-width: 170px;
+    padding: 13px 25px;
+    border: 0;
+    border-radius: 8px;
+    color: #06101d;
+    background: linear-gradient(100deg, #00f5ff, #7afcff);
+    box-shadow: 0 0 24px rgba(0, 245, 255, 0.25);
+    font-size: clamp(12px, 2vw, 15px);
+    font-weight: 1000;
+    letter-spacing: 1px;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.play-button span {
+    margin-left: 8px;
+}
+
+.play-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 32px rgba(0, 245, 255, 0.45);
+}
+
+.play-button:active {
+    transform: scale(0.96);
+}
+
+.overlay small {
+    margin-top: 15px;
+    font-size: clamp(7px, 1.5vw, 10px);
+    color: #858ab9;
+    letter-spacing: 1px;
+}
+
+.bottom-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    color: #686d9d;
+    font-size: clamp(7px, 1.4vw, 10px);
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.bottom-bar span {
+    white-space: nowrap;
+}
+
+.bottom-bar i {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 5px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+}
+
+.rotate-message {
+    display: none;
+}
+
+/* Небольшие экраны */
+@media (max-width: 600px) {
+    .game {
+        padding: 7px;
+        gap: 7px;
+    }
+
+    .topbar {
+        min-height: 30px;
+    }
+
+    .sound-button {
+        width: 32px;
+        height: 30px;
+        border-radius: 7px;
+        font-size: 17px;
+    }
+
+    .stage {
+        border-radius: 7px;
+    }
+
+    .bottom-bar {
+        letter-spacing: 0;
+    }
+
+    .play-button {
+        min-width: 125px;
+        padding: 10px 16px;
+    }
+
+    .overlay p {
+        margin-top: 7px;
+        margin-bottom: 10px;
+    }
+
+    .overlay small {
+        margin-top: 10px;
+    }
+}
+
+/* Вписываем игру в низкий экран телефона */
+@media (orientation: landscape) and (max-height: 500px) {
+    .game {
+        width: 100%;
+        max-width: 1500px;
+        padding: 5px 14px;
+        gap: 5px;
+    }
+
+    .topbar {
+        min-height: 25px;
+    }
+
+    .stage {
+        width: auto;
+        height: min( calc(100dvh - 65px), 70vw );
+        max-height: 450px;
+        aspect-ratio: 1000 / 450;
+        align-self: center;
+    }
+
+    .logo {
+        font-size: 15px;
+    }
+
+    .bottom-bar {
+        font-size: 8px;
+    }
+
+    .overlay p {
+        margin-top: 6px;
+        margin-bottom: 8px;
+    }
+
+    .overlay h1 {
+        font-size: clamp(28px, 8vh, 55px);
+    }
+
+    .play-button {
+        padding: 9px 20px;
+    }
+}
+
+/* Подсказка для вертикального положения телефона */
+@media (orientation: portrait) and (max-width: 600px) {
+    .rotate-message {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        padding: 24px;
+        text-align: center;
+        background: #090918;
+    }
+
+    .phone-icon {
+        color: var(--cyan);
+        font-size: 65px;
+        transform: rotate(-90deg);
+        text-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+    }
+
+    .rotate-message h2 {
+        font-size: 23px;
+    }
+
+    .rotate-message p {
+        max-width: 260px;
+        color: #999fca;
+        line-height: 1.5;
+        font-size: 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition: none !important;
+    }
+}
