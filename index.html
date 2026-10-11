@@ -3,71 +3,141 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1,
-                   user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#0b0b20">
-    <title>Geometry Dash — Neon Rush</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#09091c">
+    <title>Neon Dash</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main class="game">
-        <header class="topbar">
-            <div class="logo">GEOMETRY<span>DASH</span></div>
-            <div class="stats">
-                <div>СЧЁТ <b id="score">0</b></div>
-                <div>РЕКОРД <b id="best">0</b></div>
+
+    <div id="game-container">
+
+        <!-- Игровое поле -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Верхняя панель -->
+        <header class="top-bar">
+            <div class="logo">
+                NEON<span>DASH</span>
             </div>
-            <button id="soundButton" class="sound-button"
-                    aria-label="Включить или выключить звук">♫</button>
+
+            <div class="stats">
+                <div class="stat">
+                    <small>ПРОГРЕСС</small>
+                    <span id="progress">0%</span>
+                </div>
+
+                <div class="stat">
+                    <small>РЕКОРД</small>
+                    <span id="best">0%</span>
+                </div>
+            </div>
+
+            <button id="pauseButton" aria-label="Пауза">
+                Ⅱ
+            </button>
         </header>
 
-        <section class="stage" id="stage">
-            <canvas id="gameCanvas" width="1000" height="450">
-                Ваш браузер не поддерживает Canvas.
-            </canvas>
+        <!-- Главное меню -->
+        <div id="menu" class="screen">
+            <div class="menu-box">
 
-            <div class="overlay" id="startScreen">
-                <div class="eyebrow">NEON EDITION</div>
-                <h1>NEON<br><span>RUSH</span></h1>
-                <p>Прыгай. Уклоняйся. Побеждай.</p>
-                <button id="startButton" class="play-button">
-                    ИГРАТЬ <span>▶</span>
+                <div class="cube-icon">◆</div>
+
+                <p class="subtitle">ГОТОВ К ИСПЫТАНИЮ?</p>
+
+                <h1>
+                    NEON <span>DASH</span>
+                </h1>
+
+                <p class="description">
+                    Прыгай через шипы и доберись до финиша!
+                </p>
+
+                <button id="startButton" class="main-button">
+                    ИГРАТЬ ▶
                 </button>
-                <small>НАЖМИ НА ЭКРАН, ЧТОБЫ ПРЫГНУТЬ</small>
-            </div>
 
-            <div class="overlay hidden" id="gameOverScreen">
-                <div class="eyebrow">GAME OVER</div>
-                <h2 class="danger">СТОЛКНОВЕНИЕ!</h2>
-                <p>Твой счёт: <b id="finalScore">0</b></p>
-                <button id="restartButton" class="play-button">
-                    ЕЩЁ РАЗ <span>↻</span>
+                <p class="controls">
+                    КАСАНИЕ ЭКРАНА / ПРОБЕЛ — ПРЫЖОК
+                </p>
+
+            </div>
+        </div>
+
+        <!-- Меню паузы -->
+        <div id="pauseMenu" class="screen hidden">
+            <div class="menu-box">
+
+                <h2>ПАУЗА</h2>
+
+                <button id="resumeButton" class="main-button">
+                    ПРОДОЛЖИТЬ ▶
                 </button>
-            </div>
 
-            <div class="overlay hidden" id="winScreen">
-                <div class="eyebrow">LEVEL COMPLETE</div>
-                <h2 class="success">ТЫ ПОБЕДИЛ!</h2>
-                <p>1000 очков набрано!</p>
-                <button id="nextButton" class="play-button">
-                    СНОВА <span>▶</span>
+                <button id="restartButton" class="secondary-button">
+                    НАЧАТЬ ЗАНОВО ↻
                 </button>
-            </div>
 
-            <div class="rotate-message" id="rotateMessage">
-                <div class="phone-icon">▱</div>
-                <h2>Поверни телефон</h2>
-                <p>Игра создана для горизонтального экрана</p>
             </div>
-        </section>
+        </div>
 
+        <!-- Экран проигрыша -->
+        <div id="gameOverMenu" class="screen hidden">
+            <div class="menu-box">
+
+                <h2>ПОПРОБУЙ ЕЩЁ!</h2>
+
+                <p class="description">
+                    Шипы не пройдут сами по себе!
+                </p>
+
+                <button id="retryButton" class="main-button">
+                    ЕЩЁ РАЗ ↻
+                </button>
+
+            </div>
+        </div>
+
+        <!-- Экран победы -->
+        <div id="winMenu" class="screen hidden">
+            <div class="menu-box">
+
+                <h2>ТЫ ПОБЕДИЛ!</h2>
+
+                <p class="description">
+                    Отлично! Уровень пройден на 100%.
+                </p>
+
+                <button id="nextButton" class="main-button">
+                    ИГРАТЬ СНОВА ▶
+                </button>
+
+            </div>
+        </div>
+
+        <!-- Нижняя панель -->
         <footer class="bottom-bar">
-            <span><i></i> NEON WORLD</span>
-            <span>ПРОБЕЛ / ↑ / КАСАНИЕ — ПРЫЖОК</span>
-        </footer>
-    </main>
 
+            <div class="level-name">
+                УРОВЕНЬ <span>01</span>
+            </div>
+
+            <div class="progress-container">
+                <div id="progressBar"></div>
+            </div>
+
+            <div class="level-status">
+                NEON WORLD
+            </div>
+
+        </footer>
+
+    </div>
+
+    <!-- Игровая логика -->
     <script src="js.script"></script>
+
 </body>
 </html>
