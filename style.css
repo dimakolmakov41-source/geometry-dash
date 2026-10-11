@@ -1,12 +1,20 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap');
+/* =========================================
+   GEOMETRY DASH: CUBE RUSH
+   Полный стиль игры
+   ========================================= */
 
 :root {
-    --cyan: #48f6ff;
-    --pink: #ff4fd8;
-    --purple: #8b5cf6;
-    --background: #09091c;
-    --panel: rgba(19, 19, 48, 0.94);
+    --background: #10132f;
+    --panel: #1c2049;
+    --panel-light: #292f61;
+    --cyan: #00eaff;
+    --blue: #5475ff;
+    --green: #39f59b;
+    --pink: #ff4b91;
+    --purple: #b16cff;
+    --white: #ffffff;
+    --muted: #a9b5ec;
+    --border: rgba(133, 160, 255, 0.25);
 }
 
 * {
@@ -16,497 +24,1117 @@
 
 html,
 body {
-    margin: 0;
-    padding: 0;
     width: 100%;
     height: 100%;
+    margin: 0;
     overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--white);
     background: var(--background);
-    color: #ffffff;
-    font-family: 'Rajdhani', sans-serif;
-    touch-action: none;
-    user-select: none;
-    -webkit-user-select: none;
 }
 
 body {
-    position: fixed;
-    inset: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    overscroll-behavior: none;
+}
+
+button,
+input {
+    font: inherit;
 }
 
 button {
-    font-family: 'Orbitron', sans-serif;
-    -webkit-appearance: none;
-    appearance: none;
-    outline: none;
+    color: inherit;
+    cursor: pointer;
     touch-action: manipulation;
 }
 
-#game-container {
+button:focus-visible,
+input:focus-visible {
+    outline: 3px solid var(--cyan);
+    outline-offset: 4px;
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+/* =========================================
+   ФОН
+   ========================================= */
+
+.main-menu {
     position: relative;
-    width: 100%;
-    height: 100%;
-    height: 100dvh;
-    overflow: hidden;
-    background: var(--background);
-    isolation: isolate;
-}
-
-#gameCanvas {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    touch-action: none;
-}
-
-/* Верхняя панель */
-
-.top-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 2;
-
-    width: 100%;
-    height: clamp(48px, 12vh, 76px);
-
-    padding:
-        env(safe-area-inset-top, 0px)
-        clamp(12px, 3vw, 36px)
-        0;
-
-    display: flex;
-    align-items: center;
-    gap: clamp(10px, 2vw, 24px);
-
-    background: linear-gradient(
-        to bottom,
-        rgba(8, 8, 25, 0.85),
-        transparent
-    );
-}
-
-.logo {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(12px, 2vw, 20px);
-    font-weight: 900;
-    letter-spacing: 2px;
-    white-space: nowrap;
-    text-shadow: 0 0 15px rgba(72, 246, 255, 0.2);
-}
-
-.logo span {
-    color: var(--pink);
-}
-
-.stats {
-    display: flex;
-    gap: clamp(12px, 3vw, 36px);
-    margin-left: auto;
-}
-
-.stat {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    gap: 3px;
-}
-
-.stat small {
-    color: #a2a2c9;
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(7px, 1vw, 10px);
-    font-weight: 600;
-    letter-spacing: 1px;
-}
-
-.stat span {
-    color: var(--cyan);
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(13px, 2vw, 20px);
-    font-weight: 800;
-}
-
-#pauseButton {
-    width: clamp(34px, 5vh, 42px);
-    height: clamp(34px, 5vh, 42px);
-
-    display: grid;
-    place-items: center;
-
-    border: 1px solid rgba(72, 246, 255, 0.4);
-    border-radius: 10px;
-
-    background: rgba(20, 20, 52, 0.9);
-    color: var(--cyan);
-
-    font-size: 20px;
-    cursor: pointer;
-
-    transition:
-        background 0.2s,
-        box-shadow 0.2s;
-}
-
-#pauseButton:active {
-    background: rgba(72, 246, 255, 0.2);
-    box-shadow: 0 0 15px rgba(72, 246, 255, 0.3);
-}
-
-/* Нижняя панель */
-
-.bottom-bar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    z-index: 2;
-
     width: 100%;
-    min-height: clamp(42px, 9vh, 62px);
-
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
     padding:
-        8px
-        clamp(12px, 3vw, 36px)
-        max(8px, env(safe-area-inset-bottom, 0px));
+        max(16px, env(safe-area-inset-top))
+        max(20px, env(safe-area-inset-right))
+        max(12px, env(safe-area-inset-bottom))
+        max(20px, env(safe-area-inset-left));
+
+    background:
+        radial-gradient(
+            ellipse at 50% 40%,
+            rgba(63, 79, 179, 0.32),
+            transparent 55%
+        ),
+        linear-gradient(
+            135deg,
+            #10132f 0%,
+            #191744 50%,
+            #10132f 100%
+        );
+}
+
+.main-menu::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.22;
+
+    background-image:
+        linear-gradient(
+            rgba(116, 147, 255, 0.15) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(116, 147, 255, 0.15) 1px,
+            transparent 1px
+        );
+
+    background-size: 38px 38px;
+}
+
+.main-menu > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* =========================================
+   ЗАГРУЗКА
+   ========================================= */
+
+.loading-screen {
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
 
     display: flex;
     align-items: center;
-    gap: clamp(10px, 2vw, 22px);
+    justify-content: center;
 
-    background: linear-gradient(
-        to top,
-        rgba(8, 8, 25, 0.9),
-        transparent
-    );
+    padding: 24px;
+    background:
+        radial-gradient(
+            circle at center,
+            #25265c,
+            #10132f 70%
+        );
+
+    transition:
+        opacity 0.35s ease,
+        visibility 0.35s ease;
 }
 
-.level-name,
-.level-status {
-    color: #c5c5e9;
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(8px, 1vw, 11px);
-    font-weight: 700;
-    letter-spacing: 1px;
-    white-space: nowrap;
+.loading-content {
+    width: min(440px, 100%);
+    text-align: center;
 }
 
-.level-name span {
-    color: var(--pink);
+.loading-cube {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 76px;
+    height: 76px;
+    margin-bottom: 20px;
+
+    color: #10132f;
+    font-size: 42px;
+    background: var(--cyan);
+
+    border: 4px solid white;
+    border-radius: 12px;
+
+    box-shadow:
+        0 0 15px var(--cyan),
+        0 0 45px rgba(0, 234, 255, 0.45);
+
+    animation: loadingCube 0.8s ease-in-out infinite alternate;
 }
 
-.level-status {
-    color: #8888b4;
+.loading-content h1 {
+    margin: 0 0 12px;
+    font-size: clamp(22px, 4vw, 38px);
+    font-weight: 1000;
+    letter-spacing: 2px;
+    text-shadow: 0 0 18px rgba(0, 234, 255, 0.55);
 }
 
-.progress-container {
-    flex: 1;
-    height: 6px;
-    max-width: 700px;
+.loading-content p {
+    margin: 0 0 20px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 3px;
+}
 
+.loading-track {
+    width: 100%;
+    height: 15px;
     overflow: hidden;
+
+    background: #292d59;
+    border: 2px solid rgba(255, 255, 255, 0.8);
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.12);
 }
 
-#progressBar {
+.loading-bar {
     width: 0;
     height: 100%;
 
+    background: linear-gradient(
+        90deg,
+        #00eaff,
+        #5577ff,
+        #b16cff
+    );
+
     border-radius: inherit;
+    box-shadow: 0 0 12px var(--cyan);
+    transition: width 0.12s linear;
+}
+
+#loadingPercent {
+    display: block;
+    margin-top: 12px;
+    color: var(--cyan);
+    font-size: 17px;
+    font-weight: 900;
+}
+
+@keyframes loadingCube {
+    from {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    to {
+        transform: translateY(-10px) rotate(12deg);
+    }
+}
+
+/* =========================================
+   ЛОГОТИП
+   ========================================= */
+
+.game-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding-top: 4px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 45px;
+    height: 45px;
+
+    color: #10132f;
+    background: var(--cyan);
+    border: 3px solid white;
+    border-radius: 8px;
+
+    font-size: 26px;
+
+    box-shadow: 0 0 18px rgba(0, 234, 255, 0.5);
+}
+
+.logo h1 {
+    margin: 0;
+    font-size: clamp(19px, 3vw, 30px);
+    font-weight: 1000;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 15px rgba(0, 234, 255, 0.3);
+}
+
+.logo p {
+    margin: 3px 0 0;
+    color: var(--cyan);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 5px;
+}
+
+/* =========================================
+   ЦЕНТРАЛЬНОЕ МЕНЮ
+   ========================================= */
+
+.menu-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 0;
+    gap: clamp(12px, 3vh, 26px);
+}
+
+.menu-title {
+    text-align: center;
+}
+
+.menu-title h2 {
+    margin: 0;
+    font-size: clamp(17px, 2.6vw, 25px);
+    font-weight: 1000;
+    letter-spacing: 1.5px;
+}
+
+.menu-title p {
+    margin: 7px 0 0;
+    color: var(--muted);
+    font-size: clamp(9px, 1.3vw, 12px);
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.menu-buttons {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1.15fr)
+        minmax(0, 1fr);
+
+    align-items: stretch;
+
+    width: min(900px, 100%);
+    gap: clamp(10px, 2.5vw, 24px);
+}
+
+/* =========================================
+   КАРТОЧКИ МЕНЮ
+   ========================================= */
+
+.menu-card {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 0;
+    min-height: clamp(145px, 25vh, 225px);
+    padding: clamp(12px, 2vw, 22px) 10px;
+
+    overflow: hidden;
+
+    background: linear-gradient(
+        155deg,
+        rgba(41, 47, 97, 0.96),
+        rgba(25, 29, 65, 0.98)
+    );
+
+    border: 2px solid var(--border);
+    border-radius: 17px;
+
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.2),
+        inset 0 1px rgba(255, 255, 255, 0.08);
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.menu-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--cyan);
+    box-shadow:
+        0 12px 28px rgba(0, 234, 255, 0.13),
+        inset 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.card-title {
+    margin-top: 13px;
+    font-size: clamp(11px, 1.6vw, 16px);
+    font-weight: 1000;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.card-description {
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: clamp(9px, 1.2vw, 12px);
+    font-weight: 700;
+    text-align: center;
+}
+
+/* =========================================
+   КУБИК ВЫБОРА СКИНА
+   ========================================= */
+
+.skin-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: clamp(65px, 10vw, 92px);
+    height: clamp(65px, 10vw, 92px);
+
+    background: rgba(8, 12, 36, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+}
+
+.preview-cube {
+    position: relative;
+
+    width: clamp(38px, 6vw, 56px);
+    height: clamp(38px, 6vw, 56px);
+
+    background: var(--cyan);
+    border: 3px solid white;
+    border-radius: 5px;
+
+    box-shadow: 0 0 22px var(--cyan);
+
+    animation: cubeFloat 2s ease-in-out infinite;
+}
+
+.cube-eye {
+    position: absolute;
+    top: 30%;
+
+    width: 6px;
+    height: 9px;
+
+    background: #17203f;
+    border-radius: 1px;
+}
+
+.cube-eye:first-child {
+    left: 23%;
+}
+
+.cube-eye:nth-child(2) {
+    right: 23%;
+}
+
+.cube-mouth {
+    position: absolute;
+    bottom: 19%;
+    left: 31%;
+
+    width: 38%;
+    height: 4px;
+
+    background: #17203f;
+    border-radius: 2px;
+}
+
+@keyframes cubeFloat {
+    0%,
+    100% {
+        transform: translateY(0) rotate(-5deg);
+    }
+
+    50% {
+        transform: translateY(-5px) rotate(5deg);
+    }
+}
+
+/* =========================================
+   КНОПКА ИГРАТЬ
+   ========================================= */
+
+.play-card {
+    background: linear-gradient(
+        145deg,
+        #48ffb0,
+        #1bcf87
+    );
+
+    border: 3px solid #c9ffe7;
+
+    box-shadow:
+        0 0 22px rgba(57, 245, 155, 0.2),
+        inset 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.play-card:hover {
+    border-color: white;
+    box-shadow:
+        0 0 30px rgba(57, 245, 155, 0.45),
+        inset 0 2px rgba(255, 255, 255, 0.6);
+}
+
+.play-card .card-title {
+    color: #102d2a;
+    font-size: clamp(17px, 2.3vw, 25px);
+}
+
+.play-card .card-description {
+    color: #174d3c;
+}
+
+.play-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: clamp(54px, 8vw, 76px);
+    height: clamp(54px, 8vw, 76px);
+
+    padding-left: 5px;
+
+    color: #143e30;
+    background: rgba(255, 255, 255, 0.45);
+    border: 3px solid rgba(16, 45, 42, 0.2);
+    border-radius: 50%;
+
+    font-size: clamp(22px, 3vw, 33px);
+
+    transition: transform 0.2s ease;
+}
+
+.play-card:hover .play-icon {
+    transform: scale(1.08);
+}
+
+/* =========================================
+   РЕДАКТОР
+   ========================================= */
+
+.editor-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: clamp(65px, 10vw, 92px);
+    height: clamp(65px, 10vw, 92px);
+
+    color: #b9c6ff;
+    background: rgba(9, 13, 38, 0.55);
+    border: 2px solid rgba(181, 189, 255, 0.25);
+    border-radius: 15px;
+
+    font-size: clamp(29px, 5vw, 45px);
+}
+
+.coming-soon {
+    margin-top: 9px;
+    padding: 5px 10px;
+
+    color: #ffe4a3;
+    background: rgba(255, 191, 66, 0.13);
+    border: 1px solid rgba(255, 191, 66, 0.3);
+    border-radius: 6px;
+
+    font-size: 9px;
+    font-weight: 1000;
+    letter-spacing: 1px;
+}
+
+/* =========================================
+   НАСТРОЙКИ ВНИЗУ
+   ========================================= */
+
+.menu-bottom {
+    display: flex;
+    flex-shrink: 0;
+    justify-content: center;
+    padding: 5px 0;
+}
+
+.settings-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    min-width: min(260px, 80%);
+    padding: 13px 25px;
+
+    background: linear-gradient(
+        135deg,
+        #2a3061,
+        #1c2149
+    );
+
+    border: 2px solid var(--border);
+    border-radius: 11px;
+
+    font-size: 12px;
+    font-weight: 1000;
+    letter-spacing: 1.5px;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.settings-button:hover {
+    background: #343c76;
+    border-color: var(--purple);
+}
+
+.settings-icon {
+    font-size: 21px;
+}
+
+/* =========================================
+   ПОДВАЛ
+   ========================================= */
+
+.game-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    flex-shrink: 0;
+    padding-top: 4px;
+
+    color: rgba(169, 181, 236, 0.6);
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+}
+
+/* =========================================
+   ИГРОВОЙ ЭКРАН
+   ========================================= */
+
+.game-screen {
+    position: fixed;
+    z-index: 10;
+    inset: 0;
+
+    display: none;
+
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    background: #15153b;
+}
+
+#gameCanvas {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    touch-action: none;
+}
+
+.game-topbar {
+    position: absolute;
+    z-index: 5;
+    top: max(10px, env(safe-area-inset-top));
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    pointer-events: none;
+}
+
+.game-topbar > * {
+    pointer-events: auto;
+}
+
+.small-button {
+    flex-shrink: 0;
+
+    min-height: 38px;
+    padding: 8px 12px;
+
+    color: white;
+    background: rgba(18, 23, 60, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.small-button:hover {
+    border-color: var(--cyan);
+}
+
+.progress-container {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 10px;
+
+    max-width: 520px;
+}
+
+.progress-track {
+    flex: 1;
+    height: 12px;
+    overflow: hidden;
+
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+}
+
+.progress-bar {
+    width: 0;
+    height: 100%;
 
     background: linear-gradient(
         90deg,
         var(--cyan),
-        var(--purple),
-        var(--pink)
+        var(--green)
     );
 
-    box-shadow: 0 0 12px rgba(72, 246, 255, 0.6);
+    border-radius: inherit;
     transition: width 0.08s linear;
 }
 
-/* Меню и экраны */
+#progressText {
+    min-width: 36px;
+    color: white;
+    font-size: 12px;
+    font-weight: 1000;
+    text-align: right;
+}
 
-.screen {
-    position: absolute;
+/* =========================================
+   МОДАЛЬНЫЕ ОКНА
+   ========================================= */
+
+.overlay-menu {
+    position: fixed;
+    z-index: 100;
     inset: 0;
-    z-index: 5;
 
-    display: flex;
-    justify-content: center;
+    display: none;
     align-items: center;
+    justify-content: center;
 
-    padding: 12px;
+    padding: 20px;
 
-    background: rgba(5, 5, 18, 0.46);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-
-    animation: screen-appear 0.3s ease-out;
+    background: rgba(5, 7, 24, 0.78);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
-.hidden {
-    display: none !important;
-}
-
-.menu-box {
-    width: min(460px, 90vw);
-    max-height: 94%;
+.dialog {
+    width: min(390px, 100%);
+    max-height: 90%;
     overflow-y: auto;
 
-    padding: clamp(16px, 4vh, 30px) clamp(20px, 5vw, 42px);
+    padding: 25px;
 
     text-align: center;
 
-    border: 1px solid rgba(139, 92, 246, 0.48);
-    border-radius: 22px;
-
-    background: var(--panel);
-
-    box-shadow:
-        0 0 45px rgba(91, 61, 255, 0.16),
-        inset 0 1px rgba(255, 255, 255, 0.08);
-}
-
-.cube-icon {
-    width: clamp(38px, 8vh, 60px);
-    height: clamp(38px, 8vh, 60px);
-
-    display: grid;
-    place-items: center;
-
-    margin: 0 auto 16px;
-
-    border: 2px solid var(--cyan);
-    background: rgba(72, 246, 255, 0.1);
-
-    color: var(--pink);
-    font-size: clamp(22px, 4vh, 32px);
-
-    transform: rotate(45deg);
-
-    box-shadow:
-        0 0 15px rgba(72, 246, 255, 0.3),
-        inset 0 0 15px rgba(72, 246, 255, 0.08);
-
-    animation: cube-pulse 2s ease-in-out infinite;
-}
-
-.subtitle {
-    margin: 20px 0 8px;
-
-    color: var(--cyan);
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(8px, 1.2vw, 11px);
-    font-weight: 700;
-    letter-spacing: 3px;
-}
-
-h1,
-h2 {
-    margin: 8px 0 14px;
-
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(24px, 5vw, 43px);
-    font-weight: 900;
-    letter-spacing: 2px;
-}
-
-h1 span {
-    color: var(--pink);
-    text-shadow: 0 0 22px rgba(255, 79, 216, 0.35);
-}
-
-h2 {
-    font-size: clamp(23px, 4vw, 34px);
-}
-
-.description {
-    max-width: 310px;
-    margin: 0 auto 22px;
-
-    color: #c4c4e3;
-    font-size: clamp(13px, 2vw, 17px);
-    line-height: 1.4;
-}
-
-/* Кнопки */
-
-.main-button {
-    min-width: 190px;
-    min-height: 48px;
-
-    padding: 12px 25px;
-
-    border: none;
-    border-radius: 10px;
-
     background: linear-gradient(
-        100deg,
-        var(--cyan),
-        #a1ffe9
+        150deg,
+        #252b60,
+        #171b40
     );
 
-    color: #10102b;
+    border: 2px solid rgba(0, 234, 255, 0.45);
+    border-radius: 18px;
 
-    font-size: clamp(11px, 1.5vw, 13px);
-    font-weight: 900;
-    letter-spacing: 1.5px;
+    box-shadow:
+        0 20px 70px rgba(0, 0, 0, 0.5),
+        0 0 25px rgba(0, 234, 255, 0.1);
+}
 
-    cursor: pointer;
+.dialog h2 {
+    margin: 0 0 12px;
+    font-size: clamp(20px, 4vw, 27px);
+    font-weight: 1000;
+    letter-spacing: 1px;
+}
 
-    box-shadow: 0 5px 24px rgba(72, 246, 255, 0.18);
+.dialog p {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* =========================================
+   КНОПКИ ОКОН
+   ========================================= */
+
+.action-button {
+    display: block;
+
+    width: 100%;
+    margin-top: 12px;
+    padding: 13px 15px;
+
+    color: #112b2b;
+    background: linear-gradient(
+        135deg,
+        #4bffb5,
+        #18d78c
+    );
+
+    border: 2px solid #c9ffe7;
+    border-radius: 9px;
+
+    font-size: 12px;
+    font-weight: 1000;
+    letter-spacing: 0.6px;
 
     transition:
-        transform 0.15s,
-        box-shadow 0.2s;
+        filter 0.2s ease,
+        transform 0.2s ease;
 }
 
-.main-button:hover {
-    box-shadow: 0 5px 30px rgba(72, 246, 255, 0.4);
-}
-
-.main-button:active {
-    transform: scale(0.96);
+.action-button:hover {
+    filter: brightness(1.1);
 }
 
 .secondary-button {
+    color: white;
+    background: #303765;
+    border-color: #515c9d;
+}
+
+/* =========================================
+   ВЫБОР СКИНОВ
+   ========================================= */
+
+.skin-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    margin: 24px 0;
+}
+
+.skin-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 48px;
+    height: 48px;
+    padding: 5px;
+
+    background: #171b40;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 9px;
+
+    transition:
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.skin-option span {
     display: block;
 
-    min-height: 44px;
-    margin: 12px auto 0;
-    padding: 10px 20px;
+    width: 100%;
+    height: 100%;
 
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    border-radius: 10px;
+    background: var(--skin-color);
+    border: 2px solid white;
+    border-radius: 4px;
 
-    background: rgba(255, 255, 255, 0.06);
-    color: #e2e2fa;
+    box-shadow: 0 0 10px var(--skin-color);
+}
 
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
+.skin-option:hover {
+    transform: translateY(-3px);
+}
 
+.skin-option.selected {
+    border-color: var(--cyan);
+    box-shadow: 0 0 14px rgba(0, 234, 255, 0.4);
+}
+
+.skin-option.selected span {
+    border-width: 3px;
+}
+
+/* =========================================
+   НАСТРОЙКИ
+   ========================================= */
+
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+
+    margin: 18px 0;
+    padding: 13px;
+
+    text-align: left;
+
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 9px;
+
+    color: white;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.setting-row input {
+    width: 21px;
+    height: 21px;
+    flex-shrink: 0;
+
+    accent-color: var(--cyan);
     cursor: pointer;
 }
 
-.secondary-button:active {
-    background: rgba(255, 255, 255, 0.14);
-    transform: scale(0.97);
+/* =========================================
+   УВЕДОМЛЕНИЯ
+   ========================================= */
+
+.toast {
+    position: fixed;
+    z-index: 200;
+    left: 50%;
+    bottom: max(25px, env(safe-area-inset-bottom));
+
+    max-width: calc(100% - 32px);
+    padding: 12px 20px;
+
+    color: white;
+    background: #252b60;
+    border: 1px solid var(--cyan);
+    border-radius: 10px;
+
+    font-size: 12px;
+    font-weight: 900;
+    text-align: center;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transform: translate(-50%, 12px);
+
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease,
+        visibility 0.2s ease;
 }
 
-.controls {
-    margin: 18px 0 0;
-
-    color: #9999bd;
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(7px, 1vw, 9px);
-    font-weight: 600;
-    letter-spacing: 1px;
-    line-height: 1.8;
+.toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
 }
 
-/* Анимации */
+/* =========================================
+   ПЛАНШЕТЫ И УЗКИЕ ЭКРАНЫ
+   ========================================= */
 
-@keyframes screen-appear {
-    from {
-        opacity: 0;
+@media (max-width: 650px) {
+    .main-menu {
+        padding-left: 12px;
+        padding-right: 12px;
     }
 
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes cube-pulse {
-    0%,
-    100% {
-        box-shadow:
-            0 0 12px rgba(72, 246, 255, 0.25),
-            inset 0 0 10px rgba(72, 246, 255, 0.05);
+    .menu-buttons {
+        gap: 8px;
     }
 
-    50% {
-        box-shadow:
-            0 0 24px rgba(72, 246, 255, 0.55),
-            inset 0 0 16px rgba(72, 246, 255, 0.12);
-    }
-}
-
-/* Телефоны в горизонтальном режиме */
-
-@media (orientation: landscape) and (max-height: 500px) {
-    .top-bar {
-        height: 48px;
+    .menu-card {
+        padding-left: 6px;
+        padding-right: 6px;
+        border-radius: 12px;
     }
 
-    .bottom-bar {
-        min-height: 38px;
-        padding-top: 5px;
-        padding-bottom: 5px;
+    .card-title {
+        font-size: 10px;
     }
 
-    .menu-box {
-        width: min(430px, 75vw);
-        padding: 12px 25px;
-        border-radius: 16px;
+    .card-description {
+        font-size: 9px;
     }
 
-    .cube-icon {
-        width: 30px;
-        height: 30px;
-        margin-bottom: 8px;
+    .logo-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .logo h1 {
         font-size: 19px;
     }
 
-    .subtitle {
-        margin: 8px 0 4px;
-    }
-
-    h1,
-    h2 {
-        margin: 5px 0 8px;
-        font-size: clamp(22px, 6vh, 32px);
-    }
-
-    .description {
-        margin-bottom: 12px;
-        font-size: 14px;
-    }
-
-    .main-button {
-        min-height: 38px;
-        padding: 9px 20px;
-    }
-
-    .controls {
-        margin-top: 9px;
+    .settings-button {
+        padding: 11px 20px;
     }
 }
 
-/* Узкие экраны */
+/* =========================================
+   ГОРИЗОНТАЛЬНЫЙ РЕЖИМ
+   ========================================= */
 
-@media (max-width: 600px) {
-    .logo {
+@media (orientation: landscape) and (max-height: 500px) {
+    .main-menu {
+        padding-top: 7px;
+        padding-bottom: 5px;
+    }
+
+    .logo-icon {
+        width: 31px;
+        height: 31px;
+        font-size: 19px;
+    }
+
+    .logo h1 {
+        font-size: clamp(15px, 3vh, 23px);
+    }
+
+    .logo p {
+        font-size: 8px;
+        letter-spacing: 3px;
+    }
+
+    .menu-content {
+        gap: 8px;
+    }
+
+    .menu-title h2 {
+        font-size: clamp(14px, 3vh, 20px);
+    }
+
+    .menu-title p {
+        margin-top: 4px;
+        font-size: 8px;
+    }
+
+    .menu-card {
+        min-height: 0;
+        height: clamp(105px, 27vh, 145px);
+        padding: 7px;
+    }
+
+    .skin-preview,
+    .editor-icon {
+        width: clamp(42px, 10vh, 60px);
+        height: clamp(42px, 10vh, 60px);
+    }
+
+    .preview-cube {
+        width: 32px;
+        height: 32px;
+    }
+
+    .play-icon {
+        width: 43px;
+        height: 43px;
+        font-size: 20px;
+    }
+
+    .card-title {
+        margin-top: 7px;
+        font-size: 10px;
+    }
+
+    .card-description {
+        margin-top: 3px;
+        font-size: 8px;
+    }
+
+    .coming-soon {
+        margin-top: 4px;
+        padding: 3px 7px;
+        font-size: 7px;
+    }
+
+    .settings-button {
+        min-width: 200px;
+        padding: 7px 15px;
+        font-size: 10px;
+    }
+
+    .settings-icon {
+        font-size: 16px;
+    }
+
+    .game-footer {
+        font-size: 7px;
+    }
+
+    .dialog {
+        padding: 16px;
+    }
+
+    .dialog h2 {
+        font-size: 20px;
+    }
+
+    .action-button {
+        margin-top: 8px;
+        padding: 9px 12px;
+    }
+}
+
+/* =========================================
+   ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ
+   ========================================= */
+
+@media (max-width: 360px) {
+    .menu-buttons {
+        gap: 6px;
+    }
+
+    .menu-card {
+        padding: 6px 3px;
+    }
+
+    .card-title {
+        font-size: 9px;
+        letter-spacing: 0;
+    }
+
+    .card-description {
+        font-size: 8px;
+    }
+
+    .menu-title p {
         letter-spacing: 1px;
     }
-
-    .stats {
-        gap: 12px;
-    }
-
-    .level-status {
-        display: none;
-    }
-
-    .menu-box {
-        width: min(430px, 94vw);
-    }
 }
 
-/* Устройства, на которых включено уменьшение анимации */
+/* =========================================
+   УМЕНЬШЕННАЯ АНИМАЦИЯ
+   ========================================= */
 
 @media (prefers-reduced-motion: reduce) {
     *,
@@ -514,6 +1142,7 @@ h2 {
     *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
         transition-duration: 0.01ms !important;
     }
 }
