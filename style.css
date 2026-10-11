@@ -1,1148 +1,729 @@
-/* =========================================
-   GEOMETRY DASH: CUBE RUSH
-   Полный стиль игры
-   ========================================= */
-
-:root {
-    --background: #10132f;
-    --panel: #1c2049;
-    --panel-light: #292f61;
-    --cyan: #00eaff;
-    --blue: #5475ff;
-    --green: #39f59b;
-    --pink: #ff4b91;
-    --purple: #b16cff;
-    --white: #ffffff;
-    --muted: #a9b5ec;
-    --border: rgba(133, 160, 255, 0.25);
-}
 
 * {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --cyan: #00eaff;
+  --green: #55ff66;
+  --pink: #ff397b;
+  --bg: #090b20;
+  --panel: rgba(20, 27, 65, 0.94);
 }
 
 html,
 body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-    font-family: Arial, Helvetica, sans-serif;
-    color: var(--white);
-    background: var(--background);
-}
-
-body {
-    user-select: none;
-    -webkit-user-select: none;
-    overscroll-behavior: none;
-}
-
-button,
-input {
-    font: inherit;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+  touch-action: manipulation;
 }
 
 button {
-    color: inherit;
-    cursor: pointer;
-    touch-action: manipulation;
-}
-
-button:focus-visible,
-input:focus-visible {
-    outline: 3px solid var(--cyan);
-    outline-offset: 4px;
+  font-family: inherit;
+  cursor: pointer;
+  color: white;
+  border: none;
+  user-select: none;
 }
 
 button:active {
-    transform: scale(0.97);
+  transform: scale(0.96);
 }
-
-/* =========================================
-   ФОН
-   ========================================= */
-
-.main-menu {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    min-height: 0;
-    overflow: hidden;
-    padding:
-        max(16px, env(safe-area-inset-top))
-        max(20px, env(safe-area-inset-right))
-        max(12px, env(safe-area-inset-bottom))
-        max(20px, env(safe-area-inset-left));
-
-    background:
-        radial-gradient(
-            ellipse at 50% 40%,
-            rgba(63, 79, 179, 0.32),
-            transparent 55%
-        ),
-        linear-gradient(
-            135deg,
-            #10132f 0%,
-            #191744 50%,
-            #10132f 100%
-        );
-}
-
-.main-menu::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.22;
-
-    background-image:
-        linear-gradient(
-            rgba(116, 147, 255, 0.15) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(116, 147, 255, 0.15) 1px,
-            transparent 1px
-        );
-
-    background-size: 38px 38px;
-}
-
-.main-menu > * {
-    position: relative;
-    z-index: 1;
-}
-
-/* =========================================
-   ЗАГРУЗКА
-   ========================================= */
 
 .loading-screen {
-    position: fixed;
-    z-index: 1000;
-    inset: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 24px;
-    background:
-        radial-gradient(
-            circle at center,
-            #25265c,
-            #10132f 70%
-        );
-
-    transition:
-        opacity 0.35s ease,
-        visibility 0.35s ease;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 22px;
+  background:
+    radial-gradient(circle at center, #192454 0%, #090b20 68%);
 }
 
-.loading-content {
-    width: min(440px, 100%);
-    text-align: center;
+.loading-logo {
+  font-size: clamp(30px, 6vw, 56px);
+  font-weight: 1000;
+  font-style: italic;
+  letter-spacing: -2px;
+  text-shadow: 0 0 25px rgba(0, 234, 255, 0.4);
+}
+
+.loading-logo span {
+  color: var(--cyan);
 }
 
 .loading-cube {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 76px;
-    height: 76px;
-    margin-bottom: 20px;
-
-    color: #10132f;
-    font-size: 42px;
-    background: var(--cyan);
-
-    border: 4px solid white;
-    border-radius: 12px;
-
-    box-shadow:
-        0 0 15px var(--cyan),
-        0 0 45px rgba(0, 234, 255, 0.45);
-
-    animation: loadingCube 0.8s ease-in-out infinite alternate;
+  width: 48px;
+  height: 48px;
+  background: var(--cyan);
+  border: 4px solid white;
+  box-shadow: 0 0 28px var(--cyan);
+  animation: loadingJump 0.7s infinite alternate ease-in-out;
 }
 
-.loading-content h1 {
-    margin: 0 0 12px;
-    font-size: clamp(22px, 4vw, 38px);
-    font-weight: 1000;
-    letter-spacing: 2px;
-    text-shadow: 0 0 18px rgba(0, 234, 255, 0.55);
-}
-
-.loading-content p {
-    margin: 0 0 20px;
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 3px;
+.loading-caption {
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  color: #aab8ff;
 }
 
 .loading-track {
-    width: 100%;
-    height: 15px;
-    overflow: hidden;
-
-    background: #292d59;
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    border-radius: 20px;
+  width: min(300px, 75vw);
+  height: 9px;
+  overflow: hidden;
+  border: 1px solid #384578;
+  border-radius: 20px;
+  background: #111735;
 }
 
-.loading-bar {
-    width: 0;
-    height: 100%;
-
-    background: linear-gradient(
-        90deg,
-        #00eaff,
-        #5577ff,
-        #b16cff
-    );
-
-    border-radius: inherit;
-    box-shadow: 0 0 12px var(--cyan);
-    transition: width 0.12s linear;
+.loading-track div {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #00aaff, #00ffee);
+  box-shadow: 0 0 15px var(--cyan);
 }
 
 #loadingPercent {
-    display: block;
-    margin-top: 12px;
-    color: var(--cyan);
-    font-size: 17px;
-    font-weight: 900;
+  color: var(--cyan);
+  font-weight: bold;
 }
 
-@keyframes loadingCube {
-    from {
-        transform: translateY(0) rotate(0deg);
-    }
+@keyframes loadingJump {
+  from {
+    transform: translateY(0) rotate(0deg);
+  }
 
-    to {
-        transform: translateY(-10px) rotate(12deg);
-    }
+  to {
+    transform: translateY(-16px) rotate(90deg);
+  }
 }
 
-/* =========================================
-   ЛОГОТИП
-   ========================================= */
+/* Главное меню */
+
+.main-menu {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(9, 11, 32, 0.80), rgba(9, 11, 32, 0.96)),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 39px,
+      rgba(0, 234, 255, 0.09) 40px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 39px,
+      rgba(0, 234, 255, 0.09) 40px
+    );
+}
 
 .game-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    padding-top: 4px;
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 32px;
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
+.mini-logo {
+  font-size: 20px;
+  font-weight: 1000;
+  font-style: italic;
 }
 
-.logo-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 45px;
-    height: 45px;
-
-    color: #10132f;
-    background: var(--cyan);
-    border: 3px solid white;
-    border-radius: 8px;
-
-    font-size: 26px;
-
-    box-shadow: 0 0 18px rgba(0, 234, 255, 0.5);
+.mini-logo span {
+  margin-left: 7px;
+  color: var(--cyan);
 }
 
-.logo h1 {
-    margin: 0;
-    font-size: clamp(19px, 3vw, 30px);
-    font-weight: 1000;
-    letter-spacing: 1.5px;
-    text-shadow: 0 0 15px rgba(0, 234, 255, 0.3);
+.version {
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #8494cb;
 }
 
-.logo p {
-    margin: 3px 0 0;
-    color: var(--cyan);
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: 5px;
+.menu-glow {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.15;
+  pointer-events: none;
 }
 
-/* =========================================
-   ЦЕНТРАЛЬНОЕ МЕНЮ
-   ========================================= */
+.glow-one {
+  top: 15%;
+  left: -100px;
+  background: #00aaff;
+}
+
+.glow-two {
+  right: -100px;
+  bottom: 5%;
+  background: #a000ff;
+}
 
 .menu-content {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    width: 100%;
-    min-height: 0;
-    gap: clamp(12px, 3vh, 26px);
+  z-index: 1;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 70px 20px 75px;
 }
 
 .menu-title {
-    text-align: center;
+  text-align: center;
+  margin-bottom: 30px;
 }
 
-.menu-title h2 {
-    margin: 0;
-    font-size: clamp(17px, 2.6vw, 25px);
-    font-weight: 1000;
-    letter-spacing: 1.5px;
+.menu-title h1 {
+  margin: 0;
+  font-size: clamp(38px, 6vw, 70px);
+  line-height: 0.85;
+  font-weight: 1000;
+  font-style: italic;
+  letter-spacing: -2px;
+  text-shadow: 0 5px 0 #151a45;
+}
+
+.menu-title h1 span {
+  color: var(--cyan);
+  text-shadow: 0 0 25px rgba(0, 234, 255, 0.5);
 }
 
 .menu-title p {
-    margin: 7px 0 0;
-    color: var(--muted);
-    font-size: clamp(9px, 1.3vw, 12px);
-    font-weight: 800;
-    letter-spacing: 2px;
+  margin-top: 17px;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: #9eabd8;
 }
 
 .menu-buttons {
-    display: grid;
-    grid-template-columns:
-        minmax(0, 1fr)
-        minmax(0, 1.15fr)
-        minmax(0, 1fr);
-
-    align-items: stretch;
-
-    width: min(900px, 100%);
-    gap: clamp(10px, 2.5vw, 24px);
+  width: min(100%, 920px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
 }
 
-/* =========================================
-   КАРТОЧКИ МЕНЮ
-   ========================================= */
-
-.menu-card {
-    position: relative;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    min-width: 0;
-    min-height: clamp(145px, 25vh, 225px);
-    padding: clamp(12px, 2vw, 22px) 10px;
-
-    overflow: hidden;
-
-    background: linear-gradient(
-        155deg,
-        rgba(41, 47, 97, 0.96),
-        rgba(25, 29, 65, 0.98)
-    );
-
-    border: 2px solid var(--border);
-    border-radius: 17px;
-
-    box-shadow:
-        0 10px 25px rgba(0, 0, 0, 0.2),
-        inset 0 1px rgba(255, 255, 255, 0.08);
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease,
-        transform 0.2s ease;
+.side-button {
+  position: relative;
+  min-height: 110px;
+  width: 235px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #34416e;
+  border-radius: 14px;
+  background: rgba(17, 24, 57, 0.92);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  transition: border-color 0.2s, background 0.2s;
 }
 
-.menu-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--cyan);
-    box-shadow:
-        0 12px 28px rgba(0, 234, 255, 0.13),
-        inset 0 1px rgba(255, 255, 255, 0.1);
+.side-button:hover {
+  border-color: var(--cyan);
+  background: rgba(24, 40, 80, 0.98);
 }
-
-.card-title {
-    margin-top: 13px;
-    font-size: clamp(11px, 1.6vw, 16px);
-    font-weight: 1000;
-    text-align: center;
-    letter-spacing: 0.5px;
-}
-
-.card-description {
-    margin-top: 7px;
-    color: var(--muted);
-    font-size: clamp(9px, 1.2vw, 12px);
-    font-weight: 700;
-    text-align: center;
-}
-
-/* =========================================
-   КУБИК ВЫБОРА СКИНА
-   ========================================= */
 
 .skin-preview {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: clamp(65px, 10vw, 92px);
-    height: clamp(65px, 10vw, 92px);
-
-    background: rgba(8, 12, 36, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 15px;
+  width: 32px;
+  height: 32px;
+  background: var(--cyan);
+  border: 3px solid white;
+  box-shadow: 0 0 15px var(--cyan);
+  transform: rotate(8deg);
 }
-
-.preview-cube {
-    position: relative;
-
-    width: clamp(38px, 6vw, 56px);
-    height: clamp(38px, 6vw, 56px);
-
-    background: var(--cyan);
-    border: 3px solid white;
-    border-radius: 5px;
-
-    box-shadow: 0 0 22px var(--cyan);
-
-    animation: cubeFloat 2s ease-in-out infinite;
-}
-
-.cube-eye {
-    position: absolute;
-    top: 30%;
-
-    width: 6px;
-    height: 9px;
-
-    background: #17203f;
-    border-radius: 1px;
-}
-
-.cube-eye:first-child {
-    left: 23%;
-}
-
-.cube-eye:nth-child(2) {
-    right: 23%;
-}
-
-.cube-mouth {
-    position: absolute;
-    bottom: 19%;
-    left: 31%;
-
-    width: 38%;
-    height: 4px;
-
-    background: #17203f;
-    border-radius: 2px;
-}
-
-@keyframes cubeFloat {
-    0%,
-    100% {
-        transform: translateY(0) rotate(-5deg);
-    }
-
-    50% {
-        transform: translateY(-5px) rotate(5deg);
-    }
-}
-
-/* =========================================
-   КНОПКА ИГРАТЬ
-   ========================================= */
-
-.play-card {
-    background: linear-gradient(
-        145deg,
-        #48ffb0,
-        #1bcf87
-    );
-
-    border: 3px solid #c9ffe7;
-
-    box-shadow:
-        0 0 22px rgba(57, 245, 155, 0.2),
-        inset 0 2px rgba(255, 255, 255, 0.5);
-}
-
-.play-card:hover {
-    border-color: white;
-    box-shadow:
-        0 0 30px rgba(57, 245, 155, 0.45),
-        inset 0 2px rgba(255, 255, 255, 0.6);
-}
-
-.play-card .card-title {
-    color: #102d2a;
-    font-size: clamp(17px, 2.3vw, 25px);
-}
-
-.play-card .card-description {
-    color: #174d3c;
-}
-
-.play-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: clamp(54px, 8vw, 76px);
-    height: clamp(54px, 8vw, 76px);
-
-    padding-left: 5px;
-
-    color: #143e30;
-    background: rgba(255, 255, 255, 0.45);
-    border: 3px solid rgba(16, 45, 42, 0.2);
-    border-radius: 50%;
-
-    font-size: clamp(22px, 3vw, 33px);
-
-    transition: transform 0.2s ease;
-}
-
-.play-card:hover .play-icon {
-    transform: scale(1.08);
-}
-
-/* =========================================
-   РЕДАКТОР
-   ========================================= */
 
 .editor-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: clamp(65px, 10vw, 92px);
-    height: clamp(65px, 10vw, 92px);
-
-    color: #b9c6ff;
-    background: rgba(9, 13, 38, 0.55);
-    border: 2px solid rgba(181, 189, 255, 0.25);
-    border-radius: 15px;
-
-    font-size: clamp(29px, 5vw, 45px);
+  color: #a78bff;
+  font-size: 32px;
+  line-height: 32px;
 }
 
-.coming-soon {
-    margin-top: 9px;
-    padding: 5px 10px;
-
-    color: #ffe4a3;
-    background: rgba(255, 191, 66, 0.13);
-    border: 1px solid rgba(255, 191, 66, 0.3);
-    border-radius: 6px;
-
-    font-size: 9px;
-    font-weight: 1000;
-    letter-spacing: 1px;
+.editor-card small {
+  color: #7f8bb9;
+  font-size: 9px;
 }
 
-/* =========================================
-   НАСТРОЙКИ ВНИЗУ
-   ========================================= */
+.play-button {
+  min-height: 72px;
+  min-width: 205px;
+  padding: 18px 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  border: 2px solid #c1ffd0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #29ed78, #00b95b);
+  color: #062b1b;
+  font-size: 19px;
+  font-weight: 1000;
+  letter-spacing: 2px;
+  box-shadow: 0 0 28px rgba(41, 237, 120, 0.25);
+  transition: filter 0.2s, transform 0.2s;
+}
 
-.menu-bottom {
-    display: flex;
-    flex-shrink: 0;
-    justify-content: center;
-    padding: 5px 0;
+.play-button:hover {
+  filter: brightness(1.12);
+  box-shadow: 0 0 35px rgba(41, 237, 120, 0.42);
+}
+
+.play-triangle {
+  font-size: 20px;
+}
+
+/* Новая кнопка полного экрана */
+
+.fullscreen-button {
+  margin-top: 20px;
+  min-height: 46px;
+  padding: 12px 24px;
+  border: 1px solid rgba(0, 234, 255, 0.55);
+  border-radius: 10px;
+  background: rgba(0, 234, 255, 0.09);
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  box-shadow: 0 0 18px rgba(0, 234, 255, 0.08);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.fullscreen-button span {
+  margin-right: 7px;
+  font-size: 17px;
+  vertical-align: -1px;
+}
+
+.fullscreen-button:hover {
+  background: rgba(0, 234, 255, 0.18);
+  box-shadow: 0 0 24px rgba(0, 234, 255, 0.18);
 }
 
 .settings-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-
-    min-width: min(260px, 80%);
-    padding: 13px 25px;
-
-    background: linear-gradient(
-        135deg,
-        #2a3061,
-        #1c2149
-    );
-
-    border: 2px solid var(--border);
-    border-radius: 11px;
-
-    font-size: 12px;
-    font-weight: 1000;
-    letter-spacing: 1.5px;
-
-    transition:
-        border-color 0.2s ease,
-        background 0.2s ease;
+  position: absolute;
+  bottom: 27px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 23px;
+  border: 1px solid #343d67;
+  border-radius: 10px;
+  background: rgba(20, 26, 59, 0.9);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
 }
 
-.settings-button:hover {
-    background: #343c76;
-    border-color: var(--purple);
+.settings-button span {
+  margin-right: 8px;
+  color: var(--cyan);
+  font-size: 16px;
 }
 
-.settings-icon {
-    font-size: 21px;
+.settings-button:active {
+  transform: translateX(-50%) scale(0.96);
 }
 
-/* =========================================
-   ПОДВАЛ
-   ========================================= */
-
-.game-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    flex-shrink: 0;
-    padding-top: 4px;
-
-    color: rgba(169, 181, 236, 0.6);
-    font-size: 9px;
-    font-weight: 900;
-    letter-spacing: 1.5px;
+.menu-footer {
+  position: absolute;
+  right: 18px;
+  bottom: 12px;
+  color: #535f8f;
+  font-size: 9px;
+  letter-spacing: 1px;
 }
 
-/* =========================================
-   ИГРОВОЙ ЭКРАН
-   ========================================= */
+/* Игровое поле */
 
 .game-screen {
-    position: fixed;
-    z-index: 10;
-    inset: 0;
-
-    display: none;
-
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-
-    background: #15153b;
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #090b20;
 }
 
 #gameCanvas {
-    display: block;
-
-    width: 100%;
-    height: 100%;
-
-    touch-action: none;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: manipulation;
 }
 
 .game-topbar {
-    position: absolute;
-    z-index: 5;
-    top: max(10px, env(safe-area-inset-top));
-    left: max(10px, env(safe-area-inset-left));
-    right: max(10px, env(safe-area-inset-right));
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-
-    pointer-events: none;
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.game-topbar > * {
-    pointer-events: auto;
-}
-
-.small-button {
-    flex-shrink: 0;
-
-    min-height: 38px;
-    padding: 8px 12px;
-
-    color: white;
-    background: rgba(18, 23, 60, 0.9);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
-
-    font-size: 11px;
-    font-weight: 900;
-}
-
-.small-button:hover {
-    border-color: var(--cyan);
+.game-small-button {
+  padding: 10px 13px;
+  border: 1px solid #405080;
+  border-radius: 8px;
+  background: rgba(12, 17, 44, 0.88);
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
 }
 
 .progress-container {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    gap: 10px;
-
-    max-width: 520px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
 }
 
 .progress-track {
-    flex: 1;
-    height: 12px;
-    overflow: hidden;
-
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    border-radius: 20px;
+  width: min(100%, 500px);
+  height: 9px;
+  overflow: hidden;
+  border: 1px solid #465480;
+  border-radius: 20px;
+  background: #151b3d;
 }
 
-.progress-bar {
-    width: 0;
-    height: 100%;
-
-    background: linear-gradient(
-        90deg,
-        var(--cyan),
-        var(--green)
-    );
-
-    border-radius: inherit;
-    transition: width 0.08s linear;
+#progressBar {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #00baff, #00ffb7);
+  box-shadow: 0 0 12px var(--cyan);
 }
 
 #progressText {
-    min-width: 36px;
-    color: white;
-    font-size: 12px;
-    font-weight: 1000;
-    text-align: right;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  text-shadow: 0 1px 5px black;
 }
 
-/* =========================================
-   МОДАЛЬНЫЕ ОКНА
-   ========================================= */
+.game-hint {
+  position: absolute;
+  bottom: 13px;
+  left: 10px;
+  right: 10px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 9px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  pointer-events: none;
+}
+
+/* Окна паузы, победы и настроек */
 
 .overlay-menu {
-    position: fixed;
-    z-index: 100;
-    inset: 0;
-
-    display: none;
-    align-items: center;
-    justify-content: center;
-
-    padding: 20px;
-
-    background: rgba(5, 7, 24, 0.78);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: rgba(4, 6, 20, 0.78);
+  backdrop-filter: blur(8px);
 }
 
-.dialog {
-    width: min(390px, 100%);
-    max-height: 90%;
-    overflow-y: auto;
-
-    padding: 25px;
-
-    text-align: center;
-
-    background: linear-gradient(
-        150deg,
-        #252b60,
-        #171b40
-    );
-
-    border: 2px solid rgba(0, 234, 255, 0.45);
-    border-radius: 18px;
-
-    box-shadow:
-        0 20px 70px rgba(0, 0, 0, 0.5),
-        0 0 25px rgba(0, 234, 255, 0.1);
+.overlay-card {
+  width: min(100%, 390px);
+  padding: 30px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 13px;
+  border: 1px solid #354675;
+  border-radius: 20px;
+  background: var(--panel);
+  box-shadow: 0 0 55px rgba(0, 234, 255, 0.09);
+  text-align: center;
 }
 
-.dialog h2 {
-    margin: 0 0 12px;
-    font-size: clamp(20px, 4vw, 27px);
-    font-weight: 1000;
-    letter-spacing: 1px;
+.overlay-card h2 {
+  margin: 0;
+  font-size: clamp(23px, 5vw, 31px);
+  font-weight: 1000;
+  font-style: italic;
 }
 
-.dialog p {
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 700;
+.overlay-card p {
+  margin: 0 0 8px;
+  color: #a9b5e2;
+  font-size: 13px;
 }
 
-/* =========================================
-   КНОПКИ ОКОН
-   ========================================= */
-
-.action-button {
-    display: block;
-
-    width: 100%;
-    margin-top: 12px;
-    padding: 13px 15px;
-
-    color: #112b2b;
-    background: linear-gradient(
-        135deg,
-        #4bffb5,
-        #18d78c
-    );
-
-    border: 2px solid #c9ffe7;
-    border-radius: 9px;
-
-    font-size: 12px;
-    font-weight: 1000;
-    letter-spacing: 0.6px;
-
-    transition:
-        filter 0.2s ease,
-        transform 0.2s ease;
+.overlay-card .play-button {
+  width: 100%;
+  min-height: 54px;
+  font-size: 14px;
 }
 
-.action-button:hover {
-    filter: brightness(1.1);
+.danger-title {
+  color: #ff477e;
+  text-shadow: 0 0 20px rgba(255, 57, 123, 0.25);
 }
 
-.secondary-button {
-    color: white;
-    background: #303765;
-    border-color: #515c9d;
+.win-title {
+  color: #55ff99;
+  text-shadow: 0 0 20px rgba(85, 255, 153, 0.25);
 }
 
-/* =========================================
-   ВЫБОР СКИНОВ
-   ========================================= */
+.secondary-button,
+.setting-row {
+  width: 100%;
+  min-height: 46px;
+  padding: 13px 15px;
+  border: 1px solid #354575;
+  border-radius: 9px;
+  background: #151d43;
+  color: white;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.secondary-button:hover,
+.setting-row:hover {
+  border-color: var(--cyan);
+  background: #1c2955;
+}
 
 .skin-options {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-
-    margin: 24px 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 13px;
+  margin: 8px 0 13px;
 }
 
 .skin-option {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 48px;
-    height: 48px;
-    padding: 5px;
-
-    background: #171b40;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 9px;
-
-    transition:
-        border-color 0.2s ease,
-        transform 0.2s ease;
-}
-
-.skin-option span {
-    display: block;
-
-    width: 100%;
-    height: 100%;
-
-    background: var(--skin-color);
-    border: 2px solid white;
-    border-radius: 4px;
-
-    box-shadow: 0 0 10px var(--skin-color);
-}
-
-.skin-option:hover {
-    transform: translateY(-3px);
+  width: 43px;
+  height: 43px;
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  background: var(--skin);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--skin) 35%, transparent);
 }
 
 .skin-option.selected {
-    border-color: var(--cyan);
-    box-shadow: 0 0 14px rgba(0, 234, 255, 0.4);
+  outline: 3px solid white;
+  outline-offset: 4px;
 }
-
-.skin-option.selected span {
-    border-width: 3px;
-}
-
-/* =========================================
-   НАСТРОЙКИ
-   ========================================= */
-
-.setting-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-
-    margin: 18px 0;
-    padding: 13px;
-
-    text-align: left;
-
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 9px;
-
-    color: white;
-    font-size: 13px;
-    font-weight: 800;
-}
-
-.setting-row input {
-    width: 21px;
-    height: 21px;
-    flex-shrink: 0;
-
-    accent-color: var(--cyan);
-    cursor: pointer;
-}
-
-/* =========================================
-   УВЕДОМЛЕНИЯ
-   ========================================= */
 
 .toast {
-    position: fixed;
-    z-index: 200;
-    left: 50%;
-    bottom: max(25px, env(safe-area-inset-bottom));
-
-    max-width: calc(100% - 32px);
-    padding: 12px 20px;
-
-    color: white;
-    background: #252b60;
-    border: 1px solid var(--cyan);
-    border-radius: 10px;
-
-    font-size: 12px;
-    font-weight: 900;
-    text-align: center;
-
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-
-    transform: translate(-50%, 12px);
-
-    transition:
-        opacity 0.2s ease,
-        transform 0.2s ease,
-        visibility 0.2s ease;
+  position: fixed;
+  z-index: 300;
+  left: 50%;
+  bottom: 25px;
+  max-width: calc(100% - 30px);
+  padding: 13px 19px;
+  transform: translateX(-50%);
+  border: 1px solid var(--cyan);
+  border-radius: 10px;
+  background: #111936;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 0 22px rgba(0, 234, 255, 0.2);
 }
 
-.toast.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translate(-50%, 0);
+/* Телефоны и узкие экраны */
+
+@media (max-width: 700px) {
+  .game-header {
+    padding: 15px 17px;
+  }
+
+  .mini-logo {
+    font-size: 16px;
+  }
+
+  .version {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+
+  .menu-content {
+    padding: 65px 14px 80px;
+  }
+
+  .menu-title {
+    margin-bottom: 20px;
+  }
+
+  .menu-title h1 {
+    font-size: clamp(36px, 9vw, 54px);
+  }
+
+  .menu-title p {
+    font-size: 8px;
+    letter-spacing: 2px;
+  }
+
+  .menu-buttons {
+    gap: 10px;
+  }
+
+  .side-button {
+    width: 30%;
+    min-width: 0;
+    min-height: 88px;
+    padding: 8px 5px;
+    gap: 9px;
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+
+  .skin-preview {
+    width: 25px;
+    height: 25px;
+  }
+
+  .editor-icon {
+    font-size: 25px;
+    line-height: 25px;
+  }
+
+  .editor-card small {
+    font-size: 8px;
+  }
+
+  .play-button {
+    min-width: 31%;
+    min-height: 63px;
+    padding: 12px 8px;
+    gap: 7px;
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+
+  .play-triangle {
+    font-size: 15px;
+  }
+
+  .fullscreen-button {
+    margin-top: 17px;
+    padding: 11px 15px;
+    font-size: 10px;
+  }
+
+  .settings-button {
+    bottom: 20px;
+    padding: 10px 18px;
+  }
+
+  .menu-footer {
+    right: 8px;
+    bottom: 7px;
+    font-size: 7px;
+  }
+
+  .game-topbar {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    gap: 7px;
+  }
+
+  .game-small-button {
+    padding: 9px 8px;
+    font-size: 9px;
+  }
+
+  .game-hint {
+    font-size: 7px;
+    letter-spacing: 0.5px;
+  }
 }
 
-/* =========================================
-   ПЛАНШЕТЫ И УЗКИЕ ЭКРАНЫ
-   ========================================= */
+@media (max-height: 500px) {
+  .game-header {
+    padding: 10px 18px;
+  }
 
-@media (max-width: 650px) {
-    .main-menu {
-        padding-left: 12px;
-        padding-right: 12px;
-    }
+  .menu-content {
+    padding: 42px 15px 46px;
+  }
 
-    .menu-buttons {
-        gap: 8px;
-    }
+  .menu-title {
+    margin-bottom: 12px;
+  }
 
-    .menu-card {
-        padding-left: 6px;
-        padding-right: 6px;
-        border-radius: 12px;
-    }
+  .menu-title h1 {
+    font-size: 34px;
+  }
 
-    .card-title {
-        font-size: 10px;
-    }
+  .menu-title p {
+    margin-top: 9px;
+  }
 
-    .card-description {
-        font-size: 9px;
-    }
+  .side-button {
+    min-height: 72px;
+  }
 
-    .logo-icon {
-        width: 38px;
-        height: 38px;
-    }
+  .play-button {
+    min-height: 55px;
+  }
 
-    .logo h1 {
-        font-size: 19px;
-    }
+  .fullscreen-button {
+    min-height: 37px;
+    margin-top: 10px;
+    padding: 8px 16px;
+  }
 
-    .settings-button {
-        padding: 11px 20px;
-    }
-}
+  .settings-button {
+    bottom: 7px;
+    left: 14px;
+    transform: none;
+    padding: 8px 12px;
+  }
 
-/* =========================================
-   ГОРИЗОНТАЛЬНЫЙ РЕЖИМ
-   ========================================= */
+  .settings-button:active {
+    transform: scale(0.96);
+  }
 
-@media (orientation: landscape) and (max-height: 500px) {
-    .main-menu {
-        padding-top: 7px;
-        padding-bottom: 5px;
-    }
-
-    .logo-icon {
-        width: 31px;
-        height: 31px;
-        font-size: 19px;
-    }
-
-    .logo h1 {
-        font-size: clamp(15px, 3vh, 23px);
-    }
-
-    .logo p {
-        font-size: 8px;
-        letter-spacing: 3px;
-    }
-
-    .menu-content {
-        gap: 8px;
-    }
-
-    .menu-title h2 {
-        font-size: clamp(14px, 3vh, 20px);
-    }
-
-    .menu-title p {
-        margin-top: 4px;
-        font-size: 8px;
-    }
-
-    .menu-card {
-        min-height: 0;
-        height: clamp(105px, 27vh, 145px);
-        padding: 7px;
-    }
-
-    .skin-preview,
-    .editor-icon {
-        width: clamp(42px, 10vh, 60px);
-        height: clamp(42px, 10vh, 60px);
-    }
-
-    .preview-cube {
-        width: 32px;
-        height: 32px;
-    }
-
-    .play-icon {
-        width: 43px;
-        height: 43px;
-        font-size: 20px;
-    }
-
-    .card-title {
-        margin-top: 7px;
-        font-size: 10px;
-    }
-
-    .card-description {
-        margin-top: 3px;
-        font-size: 8px;
-    }
-
-    .coming-soon {
-        margin-top: 4px;
-        padding: 3px 7px;
-        font-size: 7px;
-    }
-
-    .settings-button {
-        min-width: 200px;
-        padding: 7px 15px;
-        font-size: 10px;
-    }
-
-    .settings-icon {
-        font-size: 16px;
-    }
-
-    .game-footer {
-        font-size: 7px;
-    }
-
-    .dialog {
-        padding: 16px;
-    }
-
-    .dialog h2 {
-        font-size: 20px;
-    }
-
-    .action-button {
-        margin-top: 8px;
-        padding: 9px 12px;
-    }
-}
-
-/* =========================================
-   ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ
-   ========================================= */
-
-@media (max-width: 360px) {
-    .menu-buttons {
-        gap: 6px;
-    }
-
-    .menu-card {
-        padding: 6px 3px;
-    }
-
-    .card-title {
-        font-size: 9px;
-        letter-spacing: 0;
-    }
-
-    .card-description {
-        font-size: 8px;
-    }
-
-    .menu-title p {
-        letter-spacing: 1px;
-    }
-}
-
-/* =========================================
-   УМЕНЬШЕННАЯ АНИМАЦИЯ
-   ========================================= */
-
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-        transition-duration: 0.01ms !important;
-    }
+  .menu-footer {
+    bottom: 9px;
+  }
 }
