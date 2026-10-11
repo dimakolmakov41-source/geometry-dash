@@ -1,240 +1,135 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    >
-    <meta name="theme-color" content="#10132f">
-    <title>Geometry Dash — Cube Rush</title>
-
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#090b20">
+  <title>Geometry Dash — Neon Rush</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <!-- ЭКРАН ЗАГРУЗКИ -->
-    <div id="loadingScreen" class="loading-screen">
-        <div class="loading-content">
-            <div class="loading-cube">◆</div>
+  <div id="loadingScreen" class="loading-screen">
+    <div class="loading-logo">GEOMETRY <span>DASH</span></div>
+    <div class="loading-cube"></div>
+    <div class="loading-caption">ЗАГРУЗКА ИГРЫ...</div>
+    <div class="loading-track"><div id="loadingBar"></div></div>
+    <div id="loadingPercent">0%</div>
+  </div>
 
-            <h1>GEOMETRY DASH</h1>
-            <p>ЗАГРУЗКА ИГРЫ...</p>
+  <main id="mainMenu" class="main-menu" style="display:none">
+    <div class="menu-glow glow-one"></div>
+    <div class="menu-glow glow-two"></div>
 
-            <div class="loading-track">
-                <div id="loadingBar" class="loading-bar"></div>
-            </div>
+    <header class="game-header">
+      <div class="mini-logo">GD<span>NEON</span></div>
+      <div class="version">NEON RUSH • 1.1</div>
+    </header>
 
-            <span id="loadingPercent">0%</span>
-        </div>
-    </div>
+    <section class="menu-content">
+      <div class="menu-title">
+        <h1>GEOMETRY<br><span>DASH</span></h1>
+        <p>ПРЫГАЙ. ЛЕТИ. НЕ СТОЛКНИСЬ.</p>
+      </div>
 
-    <!-- ГЛАВНОЕ МЕНЮ -->
-    <main id="mainMenu" class="main-menu">
-        <header class="game-header">
-            <div class="logo">
-                <span class="logo-icon">◆</span>
-                <div>
-                    <h1>GEOMETRY DASH</h1>
-                    <p>CUBE RUSH</p>
-                </div>
-            </div>
-        </header>
+      <div class="menu-buttons">
+        <button id="skinButton" class="side-button skin-card">
+          <div id="menuCube" class="skin-preview"></div>
+          <span>ВЫБОР СКИНА</span>
+        </button>
 
-        <section class="menu-content">
-            <div class="menu-title">
-                <h2>ГОТОВ К ПРЫЖКУ?</h2>
-                <p>ПРЫГАЙ · УКЛОНЯЙСЯ · ПОБЕЖДАЙ</p>
-            </div>
+        <button id="playButton" class="play-button">
+          <span class="play-triangle">▶</span>
+          <span>ИГРАТЬ</span>
+        </button>
 
-            <div class="menu-buttons">
+        <button id="editorButton" class="side-button editor-card">
+          <span class="editor-icon">✦</span>
+          <span>РЕДАКТОР УРОВНЕЙ</span>
+          <small>СКОРО...</small>
+        </button>
+      </div>
 
-                <!-- ВЫБОР СКИНА -->
-                <button
-                    id="skinButton"
-                    class="menu-card skin-card"
-                    type="button"
-                >
-                    <div class="skin-preview">
-                        <div id="menuCube" class="preview-cube">
-                            <span class="cube-eye"></span>
-                            <span class="cube-eye"></span>
-                            <span class="cube-mouth"></span>
-                        </div>
-                    </div>
-
-                    <span class="card-title">ВЫБОР СКИНА</span>
-                    <span class="card-description">Выбери свой кубик</span>
-                </button>
-
-                <!-- ИГРАТЬ -->
-                <button
-                    id="playButton"
-                    class="menu-card play-card"
-                    type="button"
-                >
-                    <span class="play-icon">▶</span>
-                    <span class="card-title">ИГРАТЬ</span>
-                    <span class="card-description">Начать уровень</span>
-                </button>
-
-                <!-- РЕДАКТОР -->
-                <button
-                    id="editorButton"
-                    class="menu-card editor-card"
-                    type="button"
-                >
-                    <span class="editor-icon">⚒</span>
-                    <span class="card-title">РЕДАКТОР</span>
-                    <span class="card-description">Создание уровней</span>
-                    <span class="coming-soon">СКОРО!</span>
-                </button>
-
-            </div>
-
-            <div class="menu-bottom">
-                <button
-                    id="settingsButton"
-                    class="settings-button"
-                    type="button"
-                >
-                    <span class="settings-icon">⚙</span>
-                    НАСТРОЙКИ
-                </button>
-            </div>
-        </section>
-
-        <footer class="game-footer">
-            <span>CUBE RUSH</span>
-            <span>© 2026</span>
-        </footer>
-    </main>
-
-    <!-- ИГРА -->
-    <section id="gameScreen" class="game-screen">
-        <canvas id="gameCanvas"></canvas>
-
-        <div class="game-topbar">
-            <button id="menuButton" class="small-button" type="button">
-                ◀ МЕНЮ
-            </button>
-
-            <div class="progress-container">
-                <div class="progress-track">
-                    <div id="progressBar" class="progress-bar"></div>
-                </div>
-                <span id="progressText">0%</span>
-            </div>
-
-            <button id="pauseButton" class="small-button" type="button">
-                Ⅱ
-            </button>
-        </div>
+      <button id="fullscreenButton" class="fullscreen-button">
+        <span>⛶</span> ПОЛНЫЙ ЭКРАН
+      </button>
     </section>
 
-    <!-- ПАУЗА -->
-    <div id="pauseMenu" class="overlay-menu">
-        <div class="dialog">
-            <h2>ПАУЗА</h2>
-            <button id="resumeButton" class="action-button" type="button">
-                ПРОДОЛЖИТЬ
-            </button>
-            <button id="pauseRestartButton" class="action-button" type="button">
-                ЗАНОВО
-            </button>
-            <button id="pauseHomeButton" class="action-button secondary-button" type="button">
-                В ГЛАВНОЕ МЕНЮ
-            </button>
-        </div>
+    <button id="settingsButton" class="settings-button">
+      <span>⚙</span> НАСТРОЙКИ
+    </button>
+    <div class="menu-footer">NEON RUSH • ПОЕХАЛИ! 💀</div>
+  </main>
+
+  <section id="gameScreen" class="game-screen" style="display:none">
+    <canvas id="gameCanvas"></canvas>
+
+    <div class="game-topbar">
+      <button id="menuButton" class="game-small-button">⌂ МЕНЮ</button>
+      <div class="progress-container">
+        <div class="progress-track"><div id="progressBar"></div></div>
+        <span id="progressText">0%</span>
+      </div>
+      <button id="pauseButton" class="game-small-button">Ⅱ</button>
     </div>
 
-    <!-- ПОРАЖЕНИЕ -->
-    <div id="gameOverMenu" class="overlay-menu">
-        <div class="dialog">
-            <h2>СТОЛКНОВЕНИЕ!</h2>
-            <p>Попробуй ещё раз!</p>
-            <button id="retryButton" class="action-button" type="button">
-                ПОВТОРИТЬ
-            </button>
-            <button id="gameOverHomeButton" class="action-button secondary-button" type="button">
-                В ГЛАВНОЕ МЕНЮ
-            </button>
-        </div>
+    <div class="game-hint">НАЖМИ ПРОБЕЛ / КОСНИСЬ ЭКРАНА, ЧТОБЫ ПРЫГНУТЬ</div>
+  </section>
+
+  <div id="pauseMenu" class="overlay-menu" style="display:none">
+    <div class="overlay-card">
+      <h2>ПАУЗА</h2>
+      <p>Передохни, кубик 💀</p>
+      <button id="resumeButton" class="play-button">▶ ПРОДОЛЖИТЬ</button>
+      <button id="pauseRestartButton" class="secondary-button">↻ ЗАНОВО</button>
+      <button id="pauseHomeButton" class="secondary-button">⌂ В МЕНЮ</button>
     </div>
+  </div>
 
-    <!-- ПОБЕДА -->
-    <div id="winMenu" class="overlay-menu">
-        <div class="dialog">
-            <h2>УРОВЕНЬ ПРОЙДЕН!</h2>
-            <p>ОТЛИЧНАЯ РАБОТА!</p>
-            <button id="winRestartButton" class="action-button" type="button">
-                ИГРАТЬ ЕЩЁ
-            </button>
-            <button id="winHomeButton" class="action-button secondary-button" type="button">
-                В ГЛАВНОЕ МЕНЮ
-            </button>
-        </div>
+  <div id="gameOverMenu" class="overlay-menu" style="display:none">
+    <div class="overlay-card">
+      <h2 class="danger-title">СТОЛКНОВЕНИЕ!</h2>
+      <p>Шипы победили... пока что.</p>
+      <button id="retryButton" class="play-button">↻ ЕЩЁ РАЗ</button>
+      <button id="gameOverHomeButton" class="secondary-button">⌂ В МЕНЮ</button>
     </div>
+  </div>
 
-    <!-- ВЫБОР СКИНА -->
-    <div id="skinMenu" class="overlay-menu">
-        <div class="dialog skin-dialog">
-            <h2>ВЫБОР СКИНА</h2>
-            <p>ВЫБЕРИ СВОЙ КУБИК</p>
-
-            <div class="skin-options">
-                <button class="skin-option selected" data-skin="#00eaff" type="button" aria-label="Голубой кубик">
-                    <span style="--skin-color:#00eaff"></span>
-                </button>
-
-                <button class="skin-option" data-skin="#55ff66" type="button" aria-label="Зелёный кубик">
-                    <span style="--skin-color:#55ff66"></span>
-                </button>
-
-                <button class="skin-option" data-skin="#ff4b91" type="button" aria-label="Розовый кубик">
-                    <span style="--skin-color:#ff4b91"></span>
-                </button>
-
-                <button class="skin-option" data-skin="#ffcc33" type="button" aria-label="Жёлтый кубик">
-                    <span style="--skin-color:#ffcc33"></span>
-                </button>
-
-                <button class="skin-option" data-skin="#b16cff" type="button" aria-label="Фиолетовый кубик">
-                    <span style="--skin-color:#b16cff"></span>
-                </button>
-            </div>
-
-            <button id="closeSkinButton" class="action-button" type="button">
-                ГОТОВО
-            </button>
-        </div>
+  <div id="winMenu" class="overlay-menu" style="display:none">
+    <div class="overlay-card">
+      <h2 class="win-title">УРОВЕНЬ ПРОЙДЕН!</h2>
+      <p>ВОТ ЭТО МАСТЕРСТВО! 🔥</p>
+      <button id="winRestartButton" class="play-button">↻ ЕЩЁ РАЗ</button>
+      <button id="winHomeButton" class="secondary-button">⌂ В МЕНЮ</button>
     </div>
+  </div>
 
-    <!-- НАСТРОЙКИ -->
-    <div id="settingsMenu" class="overlay-menu">
-        <div class="dialog">
-            <h2>НАСТРОЙКИ</h2>
-
-            <label class="setting-row">
-                <span>Звуковые эффекты</span>
-                <input id="soundToggle" type="checkbox" checked>
-            </label>
-
-            <label class="setting-row">
-                <span>Музыка</span>
-                <input id="musicToggle" type="checkbox" checked>
-            </label>
-
-            <button id="closeSettingsButton" class="action-button" type="button">
-                ГОТОВО
-            </button>
-        </div>
+  <div id="skinMenu" class="overlay-menu" style="display:none">
+    <div class="overlay-card">
+      <h2>ВЫБОР СКИНА</h2>
+      <p>Выбери цвет своего кубика</p>
+      <div class="skin-options">
+        <button class="skin-option selected" data-skin="#00eaff" style="--skin:#00eaff" aria-label="Голубой"></button>
+        <button class="skin-option" data-skin="#55ff66" style="--skin:#55ff66" aria-label="Зелёный"></button>
+        <button class="skin-option" data-skin="#ff4b91" style="--skin:#ff4b91" aria-label="Розовый"></button>
+        <button class="skin-option" data-skin="#ffcc33" style="--skin:#ffcc33" aria-label="Жёлтый"></button>
+        <button class="skin-option" data-skin="#b16cff" style="--skin:#b16cff" aria-label="Фиолетовый"></button>
+      </div>
+      <button id="closeSkinButton" class="secondary-button">ГОТОВО</button>
     </div>
+  </div>
 
-    <!-- УВЕДОМЛЕНИЕ -->
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="settingsMenu" class="overlay-menu" style="display:none">
+    <div class="overlay-card">
+      <h2>НАСТРОЙКИ</h2>
+      <button id="soundToggle" class="setting-row">ЗВУК: ВКЛ</button>
+      <button id="musicToggle" class="setting-row">МУЗЫКА: ВКЛ</button>
+      <button id="closeSettingsButton" class="secondary-button">ГОТОВО</button>
+    </div>
+  </div>
 
-    <!-- ВАЖНО: ИМЯ ФАЙЛА — script.js -->
-    <script src="script.js"></script>
+  <div id="toast" class="toast" style="display:none"></div>
+
+  <script src="script.js"></script>
 </body>
 </html>
