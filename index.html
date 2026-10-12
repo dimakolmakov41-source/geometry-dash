@@ -3,132 +3,147 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#090b20">
-  <title>Geometry Dash — Neon Rush</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#c90035">
+  <title>Dima Dash</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="loadingScreen" class="loading-screen">
-    <div class="loading-logo">GEOMETRY <span>DASH</span></div>
-    <div class="loading-cube"></div>
-    <div class="loading-caption">ЗАГРУЗКА ИГРЫ...</div>
-    <div class="loading-track"><div id="loadingBar"></div></div>
-    <div id="loadingPercent">0%</div>
-  </div>
+  <!-- ЗАГРУЗОЧНЫЙ ЭКРАН -->
+  <section id="loadingScreen" class="loading-screen">
+    <div class="brand">Dima</div>
+    <h1 class="loading-title">GEOMETRY DASH</h1>
 
-  <main id="mainMenu" class="main-menu" style="display:none">
-    <div class="menu-glow glow-one"></div>
-    <div class="menu-glow glow-two"></div>
-
-    <header class="game-header">
-      <div class="mini-logo">GD<span>NEON</span></div>
-      <div class="version">NEON RUSH • 1.1</div>
-    </header>
-
-    <section class="menu-content">
-      <div class="menu-title">
-        <h1>GEOMETRY<br><span>DASH</span></h1>
-        <p>ПРЫГАЙ. ЛЕТИ. НЕ СТОЛКНИСЬ.</p>
-      </div>
-
-      <div class="menu-buttons">
-        <button id="skinButton" class="side-button skin-card">
-          <div id="menuCube" class="skin-preview"></div>
-          <span>ВЫБОР СКИНА</span>
-        </button>
-
-        <button id="playButton" class="play-button">
-          <span class="play-triangle">▶</span>
-          <span>ИГРАТЬ</span>
-        </button>
-
-        <button id="editorButton" class="side-button editor-card">
-          <span class="editor-icon">✦</span>
-          <span>РЕДАКТОР УРОВНЕЙ</span>
-          <small>СКОРО...</small>
-        </button>
-      </div>
-
-      <button id="fullscreenButton" class="fullscreen-button">
-        <span>⛶</span> ПОЛНЫЙ ЭКРАН
-      </button>
-    </section>
-
-    <button id="settingsButton" class="settings-button">
-      <span>⚙</span> НАСТРОЙКИ
-    </button>
-    <div class="menu-footer">NEON RUSH • ПОЕХАЛИ! 💀</div>
-  </main>
-
-  <section id="gameScreen" class="game-screen" style="display:none">
-    <canvas id="gameCanvas"></canvas>
-
-    <div class="game-topbar">
-      <button id="menuButton" class="game-small-button">⌂ МЕНЮ</button>
-      <div class="progress-container">
-        <div class="progress-track"><div id="progressBar"></div></div>
-        <span id="progressText">0%</span>
-      </div>
-      <button id="pauseButton" class="game-small-button">Ⅱ</button>
+    <div class="loading-track">
+      <div id="loadingBar" class="loading-fill"></div>
     </div>
 
-    <div class="game-hint">НАЖМИ ПРОБЕЛ / КОСНИСЬ ЭКРАНА, ЧТОБЫ ПРЫГНУТЬ</div>
+    <p id="loadingPercent">0%</p>
+    <p class="loading-tip">WHAT IF THE SPIKES ARE THE GOOD GUYS?</p>
   </section>
 
-  <div id="pauseMenu" class="overlay-menu" style="display:none">
-    <div class="overlay-card">
-      <h2>ПАУЗА</h2>
-      <p>Передохни, кубик 💀</p>
-      <button id="resumeButton" class="play-button">▶ ПРОДОЛЖИТЬ</button>
-      <button id="pauseRestartButton" class="secondary-button">↻ ЗАНОВО</button>
-      <button id="pauseHomeButton" class="secondary-button">⌂ В МЕНЮ</button>
-    </div>
-  </div>
+  <!-- ГЛАВНОЕ МЕНЮ -->
+  <main id="mainMenu" class="main-menu hidden">
+    <button id="closeMenuButton" class="close-menu" aria-label="Закрыть меню">✕</button>
 
-  <div id="gameOverMenu" class="overlay-menu" style="display:none">
-    <div class="overlay-card">
-      <h2 class="danger-title">СТОЛКНОВЕНИЕ!</h2>
-      <p>Шипы победили... пока что.</p>
-      <button id="retryButton" class="play-button">↻ ЕЩЁ РАЗ</button>
-      <button id="gameOverHomeButton" class="secondary-button">⌂ В МЕНЮ</button>
-    </div>
-  </div>
+    <h1 class="game-logo">GEOMETRY DASH</h1>
 
-  <div id="winMenu" class="overlay-menu" style="display:none">
-    <div class="overlay-card">
-      <h2 class="win-title">УРОВЕНЬ ПРОЙДЕН!</h2>
-      <p>ВОТ ЭТО МАСТЕРСТВО! 🔥</p>
-      <button id="winRestartButton" class="play-button">↻ ЕЩЁ РАЗ</button>
-      <button id="winHomeButton" class="secondary-button">⌂ В МЕНЮ</button>
-    </div>
-  </div>
+    <div class="main-buttons">
+      <button id="skinButton" class="icon-button" aria-label="Выбор кубика">
+        <span class="cube-icon"><span>▪▪</span><small>▬</small></span>
+      </button>
 
-  <div id="skinMenu" class="overlay-menu" style="display:none">
-    <div class="overlay-card">
-      <h2>ВЫБОР СКИНА</h2>
-      <p>Выбери цвет своего кубика</p>
-      <div class="skin-options">
-        <button class="skin-option selected" data-skin="#00eaff" style="--skin:#00eaff" aria-label="Голубой"></button>
-        <button class="skin-option" data-skin="#55ff66" style="--skin:#55ff66" aria-label="Зелёный"></button>
-        <button class="skin-option" data-skin="#ff4b91" style="--skin:#ff4b91" aria-label="Розовый"></button>
-        <button class="skin-option" data-skin="#ffcc33" style="--skin:#ffcc33" aria-label="Жёлтый"></button>
-        <button class="skin-option" data-skin="#b16cff" style="--skin:#b16cff" aria-label="Фиолетовый"></button>
+      <button id="playButton" class="icon-button play-icon" aria-label="Играть">
+        <span>▶</span>
+      </button>
+
+      <button id="settingsButton" class="icon-button" aria-label="Настройки">
+        <span class="tools-icon">⚒</span>
+      </button>
+    </div>
+
+    <div class="bottom-menu">
+      <div class="left-links">
+        <div class="social-icons">
+          <span class="social facebook">f</span>
+          <span class="social twitter">♥</span>
+          <span class="social youtube">▶</span>
+          <span class="social twitch">▣</span>
+        </div>
+
+        <div class="dima-brand">Dima</div>
+        <div class="discord-icon">◉</div>
       </div>
-      <button id="closeSkinButton" class="secondary-button">ГОТОВО</button>
-    </div>
-  </div>
 
-  <div id="settingsMenu" class="overlay-menu" style="display:none">
-    <div class="overlay-card">
+      <div class="center-links">
+        <button class="round-button" id="achievementsButton" aria-label="Достижения">🏆</button>
+        <button class="round-button" id="settingsButtonBottom" aria-label="Настройки">⚙</button>
+        <button class="round-button" id="statsButton" aria-label="Статистика">▥</button>
+        <button class="round-button" id="musicButton" aria-label="Музыка">♫</button>
+      </div>
+
+      <button id="moreGamesButton" class="more-games">
+        MORE<br>GAMES
+      </button>
+    </div>
+
+    <div class="menu-version">DIMA DASH • FAN GAME</div>
+  </main>
+
+  <!-- ИГРА -->
+  <section id="gameScreen" class="game-screen hidden">
+    <canvas id="gameCanvas"></canvas>
+
+    <div class="game-top">
+      <button id="homeButton" class="game-button">⌂ МЕНЮ</button>
+      <div class="game-progress">
+        <div class="progress-outer"><div id="progressBar"></div></div>
+        <span id="progressText">0%</span>
+      </div>
+      <button id="pauseButton" class="game-button">Ⅱ</button>
+    </div>
+
+    <div class="game-hint">ПРОБЕЛ / НАЖМИ НА ЭКРАН, ЧТОБЫ ПРЫГНУТЬ</div>
+  </section>
+
+  <!-- ВЫБОР СКИНА -->
+  <section id="skinPanel" class="popup hidden">
+    <div class="popup-card">
+      <h2>ВЫБОР КУБИКА</h2>
+      <p>Выбери цвет своего персонажа</p>
+      <div class="skin-list">
+        <button class="skin-choice selected" data-color="#b7ff35" style="--skin:#b7ff35"></button>
+        <button class="skin-choice" data-color="#00eaff" style="--skin:#00eaff"></button>
+        <button class="skin-choice" data-color="#ff4b91" style="--skin:#ff4b91"></button>
+        <button class="skin-choice" data-color="#ffcc33" style="--skin:#ffcc33"></button>
+        <button class="skin-choice" data-color="#b16cff" style="--skin:#b16cff"></button>
+      </div>
+      <button id="closeSkinButton" class="popup-button">ГОТОВО</button>
+    </div>
+  </section>
+
+  <!-- НАСТРОЙКИ -->
+  <section id="settingsPanel" class="popup hidden">
+    <div class="popup-card">
       <h2>НАСТРОЙКИ</h2>
-      <button id="soundToggle" class="setting-row">ЗВУК: ВКЛ</button>
-      <button id="musicToggle" class="setting-row">МУЗЫКА: ВКЛ</button>
-      <button id="closeSettingsButton" class="secondary-button">ГОТОВО</button>
+      <button id="soundButton" class="popup-button">ЗВУК: ВКЛ</button>
+      <button id="fullscreenButton" class="popup-button">⛶ ПОЛНЫЙ ЭКРАН</button>
+      <button id="closeSettingsButton" class="popup-button">ГОТОВО</button>
     </div>
-  </div>
+  </section>
 
-  <div id="toast" class="toast" style="display:none"></div>
+  <!-- ПАУЗА -->
+  <section id="pausePanel" class="popup hidden">
+    <div class="popup-card">
+      <h2>ПАУЗА</h2>
+      <button id="resumeButton" class="popup-button green-button">▶ ПРОДОЛЖИТЬ</button>
+      <button id="restartPauseButton" class="popup-button">↻ ЗАНОВО</button>
+      <button id="homePauseButton" class="popup-button">⌂ В МЕНЮ</button>
+    </div>
+  </section>
+
+  <!-- ПРОИГРЫШ -->
+  <section id="deadPanel" class="popup hidden">
+    <div class="popup-card">
+      <h2 class="red-title">СТОЛКНОВЕНИЕ!</h2>
+      <p>Попробуй ещё раз, легенда!</p>
+      <button id="retryButton" class="popup-button green-button">↻ ЕЩЁ РАЗ</button>
+      <button id="homeDeadButton" class="popup-button">⌂ В МЕНЮ</button>
+    </div>
+  </section>
+
+  <!-- ПОБЕДА -->
+  <section id="winPanel" class="popup hidden">
+    <div class="popup-card">
+      <h2 class="green-title">УРОВЕНЬ ПРОЙДЕН!</h2>
+      <p>ЛЕГЕНДА DIMA DASH! 💀</p>
+      <button id="winRetryButton" class="popup-button green-button">↻ ЕЩЁ РАЗ</button>
+      <button id="homeWinButton" class="popup-button">⌂ В МЕНЮ</button>
+    </div>
+  </section>
+
+  <!-- УВЕДОМЛЕНИЯ -->
+  <div id="toast" class="toast hidden"></div>
 
   <script src="script.js"></script>
 </body>
