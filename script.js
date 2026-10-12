@@ -9,25 +9,30 @@ const gameScreen = $("gameScreen");
 const canvas = $("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-const pauseMenu = $("pauseMenu");
-const gameOverMenu = $("gameOverMenu");
-const winMenu = $("winMenu");
-const skinMenu = $("skinMenu");
-const settingsMenu = $("settingsMenu");
+const panels = [
+  $("skinPanel"),
+  $("settingsPanel"),
+  $("pausePanel"),
+  $("deadPanel"),
+  $("winPanel")
+];
 
 let state = "loading";
 let animationId = 0;
 let lastTime = 0;
-let toastTimer = null;
-
 let width = 0;
 let height = 0;
 let groundY = 0;
 
+let soundEnabled = true;
+let skinColor = "#b7ff35";
+let audioContext = null;
+let toastTimer = null;
+
 let cube = {
   x: 100,
   y: 0,
-  size: 34,
+  size: 32,
   vy: 0,
   rotation: 0,
   grounded: true
@@ -35,44 +40,49 @@ let cube = {
 
 let obstacles = [];
 let distance = 0;
-let levelLength = 6500;
+const levelLength = 6500;
 let obstacleTimer = 0;
-let gameSpeed = 6.2;
-let skinColor = "#00eaff";
+const gameSpeed = 5.3;
 
-const GRAVITY = 0.58;
-const JUMP_POWER = -13.5;
+const GRAVITY = 0.48;
+const JUMP_POWER = -12.4;
 
-let soundEnabled = true;
-let musicEnabled = true;
-let audioContext = null;
+let hue = 345;
+let lastColorUpdate = 0;
 
-function setVisible(element, visible, display = "flex") {
-  if (element) element.style.display = visible ? display : "none";
+/* ПОКАЗ ОКОН */
+
+function show(element, display = "flex") {
+  element.classList.remove("hidden");
+  element.style.display = display;
 }
 
-function hideAllOverlays() {
-  setVisible(pauseMenu, false);
-  setVisible(gameOverMenu, false);
-  setVisible(winMenu, false);
-  setVisible(skinMenu, false);
-  setVisible(settingsMenu, false);
+function hide(element) {
+  element.classList.add("hidden");
+  element.style.display = "none";
 }
 
-function showToast(message) {
-  const toast = $("toast");
-  toast.textContent = message;
-  setVisible(toast, true, "block");
+function hidePanels() {
+  panels.forEach(hide);
+}
+
+function toast(message) {
+  const element = $("toast");
+  element.textContent = message;
+  show(element, "block");
 
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => setVisible(toast, false), 2200);
+  toastTimer = setTimeout(() => hide(element), 2000);
 }
 
-function playTone(frequency = 440, duration = 0.09, type = "square", volume = 0.035) {
+/* ЗВУК */
+
+function playTone(frequency = 440, duration = 0.08) {
   if (!soundEnabled) return;
 
   try {
-    audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
+    audioContext = audioContext ||
+      new (window.AudioContext || window.webkitAudioContext)();
 
     if (audioContext.state === "suspended") {
       audioContext.resume();
@@ -81,9 +91,9 @@ function playTone(frequency = 440, duration = 0.09, type = "square", volume = 0.
     const oscillator = audioContext.createOscillator();
     const gain = audioContext.createGain();
 
-    oscillator.type = type;
+    oscillator.type = "square";
     oscillator.frequency.value = frequency;
-    gain.gain.setValueAtTime(volume, audioContext.currentTime);
+    gain.gain.setValueAtTime(0.035, audioContext.currentTime);
     gain.gain.exponentialRampToValueAtTime(
       0.001,
       audioContext.currentTime + duration
@@ -91,19 +101,41 @@ function playTone(frequency = 440, duration = 0.09, type = "square", volume = 0.
 
     oscillator.connect(gain);
     gain.connect(audioContext.destination);
+
     oscillator.start();
     oscillator.stop(audioContext.currentTime + duration);
   } catch (error) {
-    // Игра продолжает работать, даже если звук недоступен.
+    // Игра работает и без звука.
   }
 }
 
+/* ПЛАВНО МЕНЯЮЩИЙСЯ ФОН МЕНЮ */
+
+function animateMenuColor(time) {
+  if (time - lastColorUpdate > 80) {
+    lastColorUpdate = time;
+    hue = (hue + 0.12) % 360;
+
+    const color = `hsl(${hue}, 90%, 38%)`;
+    const lightColor = `hsl(${hue}, 90%, 48%)`;
+
+    document.documentElement.style.setProperty("--menu-color", color);
+    document.documentElement.style.setProperty("--menu-light", lightColor);
+  }
+
+  requestAnimationFrame(animateMenuColor);
+}
+
+requestAnimationFrame(animateMenuColor);
+
+/* РАЗМЕР CANVAS */
+
 function resizeCanvas() {
   const rect = canvas.getBoundingClientRect();
-
-  if (rect.width < 1 || rect.height < 1) return;
+  if (rect.width <= 0 || rect.height <= 0) return;
 
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
   width = rect.width;
   height = rect.height;
 
@@ -112,12 +144,10 @@ function resizeCanvas() {
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  groundY = height - 68;
+  groundY = height - 65;
 
   if (cube.grounded) {
     cube.y = groundY - cube.size;
-  } else {
-    cube.y = Math.min(cube.y, groundY - cube.size);
   }
 
   if (state !== "playing") draw();
@@ -125,90 +155,91 @@ function resizeCanvas() {
 
 window.addEventListener("resize", resizeCanvas);
 
+/* РИСОВАНИЕ */
+
 function drawBackground() {
   const gradient = ctx.createLinearGradient(0, 0, 0, height);
-  gradient.addColorStop(0, "#10143b");
-  gradient.addColorStop(1, "#080a1d");
+  gradient.addColorStop(0, "#0758b5");
+  gradient.addColorStop(1, "#003477");
 
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, width, height);
 
-  const gridSize = 42;
-  const offset = state === "playing" ? (distance * 0.35) % gridSize : 0;
+  const gridSize = 48;
+  const offset = (distance * 0.3) % gridSize;
 
-  ctx.strokeStyle = "rgba(0, 234, 255, 0.10)";
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = "rgba(30, 125, 230, 0.36)";
 
   for (let x = -offset; x < width; x += gridSize) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, groundY);
-    ctx.stroke();
+    ctx.strokeRect(x, 0, gridSize, groundY);
   }
 
-  for (let y = 15; y < groundY; y += gridSize) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(width, y);
-    ctx.stroke();
-  }
-
-  ctx.fillStyle = "rgba(0, 234, 255, 0.06)";
-  for (let i = 0; i < 8; i++) {
-    const x = (i * 173 - distance * 0.18) % (width + 120);
-    ctx.fillRect((x + width + 120) % (width + 120), 35 + i * 19, 3, 3);
+  for (let y = 0; y < groundY; y += gridSize) {
+    ctx.strokeRect(0, y, width, gridSize);
   }
 }
 
 function drawGround() {
-  ctx.fillStyle = "#101a3b";
+  ctx.fillStyle = "#0751a0";
   ctx.fillRect(0, groundY, width, height - groundY);
 
-  ctx.fillStyle = "#00eaff";
+  ctx.fillStyle = "#2bdcff";
   ctx.fillRect(0, groundY, width, 4);
 
-  ctx.strokeStyle = "rgba(0, 234, 255, 0.22)";
-  ctx.lineWidth = 1;
+  ctx.strokeStyle = "rgba(65, 200, 255, .4)";
+  ctx.lineWidth = 2;
 
-  const tile = 38;
-  const offset = state === "playing" ? (distance * 1.3) % tile : 0;
+  const tile = 35;
+  const offset = (distance * 1.1) % tile;
 
   for (let x = -offset; x < width; x += tile) {
-    ctx.strokeRect(x, groundY + 9, tile, 23);
+    ctx.strokeRect(x, groundY + 8, tile, 25);
   }
 }
 
 function drawCube() {
   ctx.save();
 
-  const centerX = cube.x + cube.size / 2;
-  const centerY = cube.y + cube.size / 2;
-
-  ctx.translate(centerX, centerY);
-  ctx.rotate(cube.rotation);
-
-  ctx.shadowBlur = 18;
-  ctx.shadowColor = skinColor;
-  ctx.fillStyle = skinColor;
-  ctx.fillRect(-cube.size / 2, -cube.size / 2, cube.size, cube.size);
-
-  ctx.shadowBlur = 0;
-  ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 2.5;
-  ctx.strokeRect(
-    -cube.size / 2 + 3,
-    -cube.size / 2 + 3,
-    cube.size - 6,
-    cube.size - 6
+  ctx.translate(
+    cube.x + cube.size / 2,
+    cube.y + cube.size / 2
   );
 
-  ctx.fillStyle = "#10143a";
-  ctx.fillRect(-9, -5, 5, 7);
-  ctx.fillRect(4, -5, 5, 7);
+  ctx.rotate(cube.rotation);
 
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(-8, -4, 2, 3);
-  ctx.fillRect(5, -4, 2, 3);
+  ctx.fillStyle = skinColor;
+  ctx.strokeStyle = "#343b2a";
+  ctx.lineWidth = 4;
+
+  ctx.fillRect(
+    -cube.size / 2,
+    -cube.size / 2,
+    cube.size,
+    cube.size
+  );
+
+  ctx.strokeRect(
+    -cube.size / 2,
+    -cube.size / 2,
+    cube.size,
+    cube.size
+  );
+
+  ctx.strokeStyle = "#f8ffe4";
+  ctx.lineWidth = 2;
+
+  ctx.strokeRect(
+    -cube.size / 2 + 4,
+    -cube.size / 2 + 4,
+    cube.size - 8,
+    cube.size - 8
+  );
+
+  ctx.fillStyle = "#303421";
+  ctx.fillRect(-8, -5, 5, 7);
+  ctx.fillRect(3, -5, 5, 7);
+  ctx.fillRect(-6, 5, 12, 3);
 
   ctx.restore();
 }
@@ -216,25 +247,32 @@ function drawCube() {
 function drawSpike(spike) {
   ctx.save();
 
-  ctx.shadowBlur = 12;
-  ctx.shadowColor = "#ff397b";
-  ctx.fillStyle = "#ff397b";
-  ctx.strokeStyle = "#ffd3e1";
-  ctx.lineWidth = 1.5;
+  ctx.fillStyle = "#b7ff35";
+  ctx.strokeStyle = "#3f7023";
+  ctx.lineWidth = 3;
 
   ctx.beginPath();
   ctx.moveTo(spike.x, groundY);
   ctx.lineTo(spike.x + spike.width / 2, groundY - spike.height);
   ctx.lineTo(spike.x + spike.width, groundY);
   ctx.closePath();
+
   ctx.fill();
+  ctx.stroke();
+
+  ctx.strokeStyle = "rgba(255,255,255,.65)";
+  ctx.lineWidth = 2;
+
+  ctx.beginPath();
+  ctx.moveTo(spike.x + 6, groundY - 3);
+  ctx.lineTo(spike.x + spike.width / 2, groundY - spike.height + 8);
   ctx.stroke();
 
   ctx.restore();
 }
 
 function draw() {
-  if (!ctx || width < 1 || height < 1) return;
+  if (!width || !height) return;
 
   drawBackground();
   drawGround();
@@ -246,11 +284,12 @@ function draw() {
   drawCube();
 }
 
+/* ИГРОВОЙ ПРОЦЕСС */
+
 function resetGame() {
   distance = 0;
-  obstacleTimer = 0;
+  obstacleTimer = 70;
   obstacles = [];
-  gameSpeed = 6.2;
 
   cube.x = Math.max(55, Math.min(100, width * 0.18));
   cube.y = groundY - cube.size;
@@ -263,79 +302,91 @@ function resetGame() {
 }
 
 function updateProgress() {
-  const percent = Math.min(100, Math.floor((distance / levelLength) * 100));
+  const percent = Math.min(
+    100,
+    Math.floor((distance / levelLength) * 100)
+  );
+
   $("progressBar").style.width = percent + "%";
   $("progressText").textContent = percent + "%";
 }
 
 function spawnObstacleGroup() {
-  const startX = width + 25;
-  const spikeWidth = 34;
-  const spikeHeight = 38 + Math.random() * 4;
+  const spikeWidth = 32;
+  const gap = 10;
 
-  // Двойные и тройные шипы появляются не слишком часто.
+  // Одиночные, двойные и тройные группы шипов.
   const roll = Math.random();
   let count = 1;
 
-  if (roll > 0.66) count = 2;
-  if (roll > 0.91) count = 3;
+  if (roll > 0.58) count = 2;
+  if (roll > 0.84) count = 3;
 
-  const gap = 30;
+  const startX = width + 20;
 
   for (let i = 0; i < count; i++) {
     obstacles.push({
       x: startX + i * (spikeWidth + gap),
       width: spikeWidth,
-      height: spikeHeight
+      height: 35
     });
   }
 
-  // Достаточно времени для подготовки к следующей группе.
-  obstacleTimer = 78 + Math.random() * 40;
+  // Расстояние до следующей группы даёт время подготовиться.
+  obstacleTimer = 88 + Math.random() * 36;
 }
 
 function jump() {
-  if (state !== "playing") return;
+  if (state !== "playing" || !cube.grounded) return;
 
-  if (cube.grounded) {
-    cube.vy = JUMP_POWER;
-    cube.grounded = false;
-    playTone(540, 0.08, "square", 0.025);
-  }
+  cube.vy = JUMP_POWER;
+  cube.grounded = false;
+
+  playTone(520, 0.07);
 }
 
-function isColliding(spike) {
-  // Немного уменьшаем хитбоксы, чтобы столкновения ощущались честнее.
-  const playerLeft = cube.x + 5;
-  const playerRight = cube.x + cube.size - 5;
-  const playerTop = cube.y + 5;
-  const playerBottom = cube.y + cube.size - 2;
+function collides(spike) {
+  // Небольшой запас у хитбоксов делает прыжки справедливее.
+  const left = cube.x + 5;
+  const right = cube.x + cube.size - 5;
+  const top = cube.y + 5;
+  const bottom = cube.y + cube.size - 2;
 
   const spikeLeft = spike.x + 5;
   const spikeRight = spike.x + spike.width - 5;
-  const spikeTop = groundY - spike.height + 10;
+  const spikeTop = groundY - spike.height + 9;
 
-  const overlapsX = playerRight > spikeLeft && playerLeft < spikeRight;
-  const overlapsY = playerBottom > spikeTop;
+  return (
+    right > spikeLeft &&
+    left < spikeRight &&
+    bottom > spikeTop &&
+    top < groundY
+  );
+}
 
-  return overlapsX && overlapsY;
+function stopLoop() {
+  if (animationId) {
+    cancelAnimationFrame(animationId);
+    animationId = 0;
+  }
 }
 
 function gameOver() {
   if (state !== "playing") return;
 
-  state = "gameover";
-  playTone(130, 0.35, "sawtooth", 0.05);
-  setVisible(gameOverMenu, true);
+  state = "dead";
+  stopLoop();
+  playTone(120, 0.2);
+  show($("deadPanel"));
 }
 
 function winGame() {
   if (state !== "playing") return;
 
   state = "won";
-  playTone(700, 0.18, "sine", 0.05);
-  setTimeout(() => playTone(900, 0.22, "sine", 0.05), 130);
-  setVisible(winMenu, true);
+  stopLoop();
+  playTone(700, 0.12);
+  show($("winPanel"));
 }
 
 function update(delta) {
@@ -352,7 +403,9 @@ function update(delta) {
     spike.x -= gameSpeed * dt;
   }
 
-  obstacles = obstacles.filter((spike) => spike.x + spike.width > -20);
+  obstacles = obstacles.filter(
+    (spike) => spike.x + spike.width > -10
+  );
 
   cube.vy += GRAVITY * dt;
   cube.y += cube.vy * dt;
@@ -366,13 +419,14 @@ function update(delta) {
   }
 
   if (cube.grounded) {
-    cube.rotation = Math.round(cube.rotation / (Math.PI / 2)) * (Math.PI / 2);
+    cube.rotation =
+      Math.round(cube.rotation / (Math.PI / 2)) * (Math.PI / 2);
   } else {
-    cube.rotation += 0.085 * dt;
+    cube.rotation += 0.09 * dt;
   }
 
   for (const spike of obstacles) {
-    if (isColliding(spike)) {
+    if (collides(spike)) {
       gameOver();
       return;
     }
@@ -404,24 +458,18 @@ function gameLoop(time) {
   }
 }
 
-function stopGameLoop() {
-  if (animationId) {
-    cancelAnimationFrame(animationId);
-    animationId = 0;
-  }
-}
+/* ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ */
 
 function startGame() {
-  stopGameLoop();
-  hideAllOverlays();
-
-  setVisible(loadingScreen, false);
-  setVisible(mainMenu, false);
-  setVisible(gameScreen, true, "block");
+  stopLoop();
+  hidePanels();
+  hide(loadingScreen);
+  hide(mainMenu);
+  show(gameScreen, "block");
 
   state = "playing";
 
-  // Сначала показываем игровую область, затем измеряем canvas.
+  // Canvas измеряется после появления игрового экрана.
   resizeCanvas();
   resetGame();
 
@@ -429,146 +477,161 @@ function startGame() {
   animationId = requestAnimationFrame(gameLoop);
 }
 
-function showMainMenu() {
-  stopGameLoop();
+function goHome() {
+  stopLoop();
   state = "menu";
 
-  hideAllOverlays();
-  setVisible(gameScreen, false);
-  setVisible(loadingScreen, false);
-  setVisible(mainMenu, true, "flex");
-
-  $("menuCube").style.backgroundColor = skinColor;
+  hidePanels();
+  hide(gameScreen);
+  hide(loadingScreen);
+  show(mainMenu, "flex");
 }
 
 function pauseGame() {
   if (state !== "playing") return;
 
   state = "paused";
-  stopGameLoop();
-  setVisible(pauseMenu, true);
+  stopLoop();
+  show($("pausePanel"));
 }
 
 function resumeGame() {
   if (state !== "paused") return;
 
-  hideAllOverlays();
+  hidePanels();
   state = "playing";
   lastTime = performance.now();
   animationId = requestAnimationFrame(gameLoop);
 }
 
-function openFullscreen() {
-  const target = document.documentElement;
+/* ПОЛНЫЙ ЭКРАН */
 
-  if (document.fullscreenElement) {
-    if (document.exitFullscreen) {
-      document.exitFullscreen().catch(() => {
-        showToast("Не удалось выйти из полного экрана");
-      });
+async function toggleFullscreen() {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else if (document.documentElement.requestFullscreen) {
+      await document.documentElement.requestFullscreen();
+    } else {
+      toast("Браузер не поддерживает полный экран");
+      return;
     }
-    return;
-  }
 
-  if (target.requestFullscreen) {
-    target.requestFullscreen().then(() => {
-      showToast("Полный экран включён!");
-    }).catch(() => {
-      showToast("Полный экран не поддерживается браузером");
-    });
-  } else {
-    showToast("Нажми меню браузера и выбери «На весь экран»");
+    toast(
+      document.fullscreenElement
+        ? "Полный экран включён!"
+        : "Полный экран выключен"
+    );
+
+    setTimeout(resizeCanvas, 100);
+  } catch (error) {
+    toast("Попробуй открыть игру в браузере");
   }
 }
-
-function updateFullscreenButton() {
-  const button = $("fullscreenButton");
-  if (!button) return;
-
-  button.innerHTML = document.fullscreenElement
-    ? "<span>⛶</span> ВЫЙТИ ИЗ ПОЛНОГО ЭКРАНА"
-    : "<span>⛶</span> ПОЛНЫЙ ЭКРАН";
-}
-
-$("playButton").addEventListener("click", startGame);
-$("fullscreenButton").addEventListener("click", openFullscreen);
 
 document.addEventListener("fullscreenchange", () => {
-  updateFullscreenButton();
+  $("fullscreenButton").textContent = document.fullscreenElement
+    ? "⛶ ВЫЙТИ ИЗ ПОЛНОГО ЭКРАНА"
+    : "⛶ ПОЛНЫЙ ЭКРАН";
+
   setTimeout(resizeCanvas, 100);
 });
 
-$("menuButton").addEventListener("click", showMainMenu);
-$("pauseButton").addEventListener("click", pauseGame);
-$("resumeButton").addEventListener("click", resumeGame);
+/* КНОПКИ МЕНЮ */
 
-$("pauseRestartButton").addEventListener("click", startGame);
-$("retryButton").addEventListener("click", startGame);
-$("winRestartButton").addEventListener("click", startGame);
-
-$("pauseHomeButton").addEventListener("click", showMainMenu);
-$("gameOverHomeButton").addEventListener("click", showMainMenu);
-$("winHomeButton").addEventListener("click", showMainMenu);
+$("playButton").addEventListener("click", startGame);
 
 $("skinButton").addEventListener("click", () => {
-  setVisible(skinMenu, true);
+  show($("skinPanel"));
 });
 
 $("closeSkinButton").addEventListener("click", () => {
-  setVisible(skinMenu, false);
+  hide($("skinPanel"));
 });
 
-document.querySelectorAll(".skin-option").forEach((button) => {
+document.querySelectorAll(".skin-choice").forEach((button) => {
   button.addEventListener("click", () => {
-    skinColor = button.dataset.skin;
+    skinColor = button.dataset.color;
 
-    document.querySelectorAll(".skin-option").forEach((item) => {
+    document.querySelectorAll(".skin-choice").forEach((item) => {
       item.classList.remove("selected");
     });
 
     button.classList.add("selected");
-    $("menuCube").style.backgroundColor = skinColor;
-    draw();
-    playTone(650, 0.07, "sine");
+    playTone(650, 0.06);
   });
 });
 
-$("settingsButton").addEventListener("click", () => {
-  setVisible(settingsMenu, true);
-});
+function openSettings() {
+  show($("settingsPanel"));
+}
+
+$("settingsButton").addEventListener("click", openSettings);
+$("settingsButtonBottom").addEventListener("click", openSettings);
 
 $("closeSettingsButton").addEventListener("click", () => {
-  setVisible(settingsMenu, false);
+  hide($("settingsPanel"));
 });
 
-$("soundToggle").addEventListener("click", () => {
+$("fullscreenButton").addEventListener("click", toggleFullscreen);
+
+$("soundButton").addEventListener("click", () => {
   soundEnabled = !soundEnabled;
-  $("soundToggle").textContent = "ЗВУК: " + (soundEnabled ? "ВКЛ" : "ВЫКЛ");
-  if (soundEnabled) playTone(600, 0.08);
+  $("soundButton").textContent =
+    "ЗВУК: " + (soundEnabled ? "ВКЛ" : "ВЫКЛ");
+
+  if (soundEnabled) playTone(600, 0.07);
 });
 
-$("musicToggle").addEventListener("click", () => {
-  musicEnabled = !musicEnabled;
-  $("musicToggle").textContent = "МУЗЫКА: " + (musicEnabled ? "ВКЛ" : "ВЫКЛ");
-  showToast(musicEnabled ? "Музыка включена в настройках" : "Музыка выключена");
+$("musicButton").addEventListener("click", () => {
+  toast("Музыку добавим в следующем обновлении!");
 });
 
-$("editorButton").addEventListener("click", () => {
-  showToast("Редактор уровней появится в будущем!");
+$("achievementsButton").addEventListener("click", () => {
+  toast("Достижения появятся позже!");
 });
+
+$("statsButton").addEventListener("click", () => {
+  toast("Статистика появится позже!");
+});
+
+$("moreGamesButton").addEventListener("click", () => {
+  toast("Другие игры Dima скоро появятся!");
+});
+
+$("closeMenuButton").addEventListener("click", () => {
+  toast("Это главное меню Dima Dash!");
+});
+
+/* КНОПКИ ИГРЫ */
+
+$("homeButton").addEventListener("click", goHome);
+$("pauseButton").addEventListener("click", pauseGame);
+$("resumeButton").addEventListener("click", resumeGame);
+
+$("restartPauseButton").addEventListener("click", startGame);
+$("retryButton").addEventListener("click", startGame);
+$("winRetryButton").addEventListener("click", startGame);
+
+$("homePauseButton").addEventListener("click", goHome);
+$("homeDeadButton").addEventListener("click", goHome);
+$("homeWinButton").addEventListener("click", goHome);
+
+/* УПРАВЛЕНИЕ */
 
 window.addEventListener("keydown", (event) => {
-  if (event.code === "Space" || event.code === "ArrowUp" || event.code === "KeyW") {
+  if (
+    event.code === "Space" ||
+    event.code === "ArrowUp" ||
+    event.code === "KeyW"
+  ) {
     event.preventDefault();
 
-    if (state === "playing") {
-      jump();
-    } else if (state === "paused") {
-      resumeGame();
-    }
+    if (state === "playing") jump();
+    else if (state === "paused") resumeGame();
   }
 
-  if (event.code === "Escape" && state === "playing" && !document.fullscreenElement) {
+  if (event.code === "Escape" && state === "playing") {
     pauseGame();
   }
 });
@@ -578,7 +641,11 @@ canvas.addEventListener("pointerdown", (event) => {
   jump();
 });
 
-canvas.addEventListener("contextmenu", (event) => event.preventDefault());
+canvas.addEventListener("contextmenu", (event) => {
+  event.preventDefault();
+});
+
+/* ЗАГРУЗКА */
 
 function startLoading() {
   let progress = 0;
@@ -586,26 +653,25 @@ function startLoading() {
   const percent = $("loadingPercent");
 
   const timer = setInterval(() => {
-    progress += 5 + Math.random() * 12;
-    progress = Math.min(progress, 100);
+    progress = Math.min(100, progress + 4 + Math.random() * 10);
 
     bar.style.width = progress + "%";
     percent.textContent = Math.floor(progress) + "%";
 
     if (progress >= 100) {
       clearInterval(timer);
+
       setTimeout(() => {
-        setVisible(loadingScreen, false);
-        setVisible(mainMenu, true, "flex");
+        hide(loadingScreen);
+        show(mainMenu, "flex");
         state = "menu";
-        updateFullscreenButton();
-      }, 250);
+      }, 350);
     }
-  }, 75);
+  }, 90);
 }
 
-setVisible(loadingScreen, true, "flex");
-setVisible(mainMenu, false);
-setVisible(gameScreen, false);
-resizeCanvas();
+hide(mainMenu);
+hide(gameScreen);
+hidePanels();
+show(loadingScreen, "flex");
 startLoading();
