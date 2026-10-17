@@ -10,6 +10,7 @@ const canvas = $("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const panels = [
+  $("levelPanel"),
   $("skinPanel"),
   $("settingsPanel"),
   $("pausePanel"),
@@ -17,6 +18,34 @@ const panels = [
   $("winPanel")
 ];
 
+/* 22 ОСНОВНЫХ УРОВНЯ — В ПРАВИЛЬНОМ ПОРЯДКЕ */
+
+const levels = [
+  { name: "Stereo Madness", difficulty: "Лёгкий", length: 5200, gap: 115, doubles: 0.12, triples: 0.02 },
+  { name: "Back on Track", difficulty: "Лёгкий", length: 5500, gap: 108, doubles: 0.18, triples: 0.03 },
+  { name: "Polargeist", difficulty: "Нормальный", length: 5800, gap: 103, doubles: 0.23, triples: 0.05 },
+  { name: "Dry Out", difficulty: "Нормальный", length: 6000, gap: 100, doubles: 0.27, triples: 0.06 },
+  { name: "Base After Base", difficulty: "Нормальный", length: 6200, gap: 97, doubles: 0.29, triples: 0.07 },
+  { name: "Can't Let Go", difficulty: "Нормальный", length: 6400, gap: 94, doubles: 0.32, triples: 0.09 },
+  { name: "Jumper", difficulty: "Сложный", length: 6500, gap: 92, doubles: 0.35, triples: 0.10 },
+  { name: "Time Machine", difficulty: "Сложный", length: 6700, gap: 90, doubles: 0.38, triples: 0.12 },
+  { name: "Cycles", difficulty: "Сложный", length: 6800, gap: 88, doubles: 0.40, triples: 0.13 },
+  { name: "xStep", difficulty: "Сложный", length: 7000, gap: 86, doubles: 0.42, triples: 0.15 },
+  { name: "Clutterfunk", difficulty: "Очень сложный", length: 7200, gap: 84, doubles: 0.44, triples: 0.17 },
+  { name: "Theory of Everything", difficulty: "Очень сложный", length: 7300, gap: 82, doubles: 0.46, triples: 0.18 },
+  { name: "Electroman Adventures", difficulty: "Очень сложный", length: 7500, gap: 80, doubles: 0.47, triples: 0.19 },
+  { name: "Clubstep", difficulty: "Безумный", length: 7700, gap: 79, doubles: 0.48, triples: 0.21 },
+  { name: "Electrodynamix", difficulty: "Безумный", length: 7900, gap: 77, doubles: 0.49, triples: 0.22 },
+  { name: "Hexagon Force", difficulty: "Безумный", length: 8000, gap: 76, doubles: 0.50, triples: 0.23 },
+  { name: "Blast Processing", difficulty: "Сложный", length: 7800, gap: 79, doubles: 0.45, triples: 0.17 },
+  { name: "Theory of Everything 2", difficulty: "Безумный", length: 8200, gap: 74, doubles: 0.51, triples: 0.24 },
+  { name: "Geometrical Dominator", difficulty: "Очень сложный", length: 8000, gap: 76, doubles: 0.49, triples: 0.21 },
+  { name: "Deadlocked", difficulty: "Безумный", length: 8500, gap: 72, doubles: 0.52, triples: 0.26 },
+  { name: "Fingerdash", difficulty: "Безумный", length: 8400, gap: 73, doubles: 0.51, triples: 0.25 },
+  { name: "Dash", difficulty: "Безумный", length: 8600, gap: 72, doubles: 0.52, triples: 0.26 }
+];
+
+let selectedLevel = 0;
 let state = "loading";
 let animationId = 0;
 let lastTime = 0;
@@ -40,17 +69,13 @@ let cube = {
 
 let obstacles = [];
 let distance = 0;
-const levelLength = 6500;
 let obstacleTimer = 0;
-const gameSpeed = 5.3;
-
-const GRAVITY = 0.48;
-const JUMP_POWER = -12.4;
-
 let hue = 345;
 let lastColorUpdate = 0;
 
-/* ПОКАЗ ОКОН */
+const GRAVITY = 0.52;
+
+/* ОКНА И УВЕДОМЛЕНИЯ */
 
 function show(element, display = "flex") {
   element.classList.remove("hidden");
@@ -72,7 +97,7 @@ function toast(message) {
   show(element, "block");
 
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => hide(element), 2000);
+  toastTimer = setTimeout(() => hide(element), 2200);
 }
 
 /* ЗВУК */
@@ -101,26 +126,29 @@ function playTone(frequency = 440, duration = 0.08) {
 
     oscillator.connect(gain);
     gain.connect(audioContext.destination);
-
     oscillator.start();
     oscillator.stop(audioContext.currentTime + duration);
   } catch (error) {
-    // Игра работает и без звука.
+    // Игра продолжает работать без звука.
   }
 }
 
-/* ПЛАВНО МЕНЯЮЩИЙСЯ ФОН МЕНЮ */
+/* ПЛАВНАЯ СМЕНА ЦВЕТА МЕНЮ */
 
 function animateMenuColor(time) {
   if (time - lastColorUpdate > 80) {
     lastColorUpdate = time;
     hue = (hue + 0.12) % 360;
 
-    const color = `hsl(${hue}, 90%, 38%)`;
-    const lightColor = `hsl(${hue}, 90%, 48%)`;
+    document.documentElement.style.setProperty(
+      "--menu-color",
+      `hsl(${hue}, 90%, 38%)`
+    );
 
-    document.documentElement.style.setProperty("--menu-color", color);
-    document.documentElement.style.setProperty("--menu-light", lightColor);
+    document.documentElement.style.setProperty(
+      "--menu-light",
+      `hsl(${hue}, 90%, 48%)`
+    );
   }
 
   requestAnimationFrame(animateMenuColor);
@@ -128,7 +156,51 @@ function animateMenuColor(time) {
 
 requestAnimationFrame(animateMenuColor);
 
-/* РАЗМЕР CANVAS */
+/* СПИСОК УРОВНЕЙ */
+
+function buildLevelList() {
+  const list = $("levelList");
+  list.replaceChildren();
+
+  levels.forEach((level, index) => {
+    const button = document.createElement("button");
+    button.className = "level-choice";
+    button.type = "button";
+
+    if (index === selectedLevel) {
+      button.classList.add("selected");
+    }
+
+    const number = document.createElement("span");
+    number.className = "level-number";
+    number.textContent = index + 1;
+
+    const details = document.createElement("span");
+    details.className = "level-details";
+
+    const title = document.createElement("span");
+    title.className = "level-title";
+    title.textContent = level.name;
+
+    const difficulty = document.createElement("span");
+    difficulty.className = "level-difficulty";
+    difficulty.textContent = level.difficulty;
+
+    details.append(title, difficulty);
+    button.append(number, details);
+
+    button.addEventListener("click", () => {
+      selectedLevel = index;
+      playTone(520, 0.06);
+      hide($("levelPanel"));
+      startGame();
+    });
+
+    list.append(button);
+  });
+}
+
+/* CANVAS */
 
 function resizeCanvas() {
   const rect = canvas.getBoundingClientRect();
@@ -143,7 +215,6 @@ function resizeCanvas() {
   canvas.height = Math.round(height * dpr);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
   groundY = height - 65;
 
   if (cube.grounded) {
@@ -168,7 +239,7 @@ function drawBackground() {
   const gridSize = 48;
   const offset = (distance * 0.3) % gridSize;
 
-  ctx.lineWidth = 5;
+  ctx.lineWidth = 2;
   ctx.strokeStyle = "rgba(30, 125, 230, 0.36)";
 
   for (let x = -offset; x < width; x += gridSize) {
@@ -277,18 +348,15 @@ function draw() {
   drawBackground();
   drawGround();
 
-  for (const spike of obstacles) {
-    drawSpike(spike);
-  }
-
+  obstacles.forEach(drawSpike);
   drawCube();
 }
 
-/* ИГРОВОЙ ПРОЦЕСС */
+/* ИГРА */
 
 function resetGame() {
   distance = 0;
-  obstacleTimer = 70;
+  obstacleTimer = 75;
   obstacles = [];
 
   cube.x = Math.max(55, Math.min(100, width * 0.18));
@@ -297,14 +365,16 @@ function resetGame() {
   cube.rotation = 0;
   cube.grounded = true;
 
+  $("levelNameHUD").textContent = levels[selectedLevel].name.toUpperCase();
   updateProgress();
   draw();
 }
 
 function updateProgress() {
+  const level = levels[selectedLevel];
   const percent = Math.min(
     100,
-    Math.floor((distance / levelLength) * 100)
+    Math.floor((distance / level.length) * 100)
   );
 
   $("progressBar").style.width = percent + "%";
@@ -312,15 +382,15 @@ function updateProgress() {
 }
 
 function spawnObstacleGroup() {
+  const level = levels[selectedLevel];
   const spikeWidth = 32;
   const gap = 10;
-
-  // Одиночные, двойные и тройные группы шипов.
   const roll = Math.random();
+
   let count = 1;
 
-  if (roll > 0.58) count = 2;
-  if (roll > 0.84) count = 3;
+  if (roll > 1 - level.doubles) count = 2;
+  if (roll > 1 - level.triples) count = 3;
 
   const startX = width + 20;
 
@@ -332,21 +402,20 @@ function spawnObstacleGroup() {
     });
   }
 
-  // Расстояние до следующей группы даёт время подготовиться.
-  obstacleTimer = 88 + Math.random() * 36;
+  obstacleTimer = level.gap + Math.random() * 22;
 }
 
 function jump() {
   if (state !== "playing" || !cube.grounded) return;
 
-  cube.vy = JUMP_POWER;
+  // Прыжок немного ниже, чем в предыдущей версии.
+  cube.vy = -11.4;
   cube.grounded = false;
 
   playTone(520, 0.07);
 }
 
 function collides(spike) {
-  // Небольшой запас у хитбоксов делает прыжки справедливее.
   const left = cube.x + 5;
   const right = cube.x + cube.size - 5;
   const top = cube.y + 5;
@@ -386,13 +455,24 @@ function winGame() {
   state = "won";
   stopLoop();
   playTone(700, 0.12);
+
+  $("winLevelText").textContent =
+    `Ты прошёл уровень ${selectedLevel + 1}: ${levels[selectedLevel].name}!`;
+
+  $("nextLevelButton").textContent =
+    selectedLevel < levels.length - 1
+      ? "▶ СЛЕДУЮЩИЙ УРОВЕНЬ"
+      : "✓ ВСЕ УРОВНИ ЗАВЕРШЕНЫ";
+
   show($("winPanel"));
 }
 
 function update(delta) {
   const dt = Math.min(delta / 16.67, 2);
+  const level = levels[selectedLevel];
+  const speed = 5.1 + Math.min(selectedLevel * 0.035, 0.7);
 
-  distance += gameSpeed * dt;
+  distance += speed * dt;
   obstacleTimer -= dt;
 
   if (obstacleTimer <= 0) {
@@ -400,7 +480,7 @@ function update(delta) {
   }
 
   for (const spike of obstacles) {
-    spike.x -= gameSpeed * dt;
+    spike.x -= speed * dt;
   }
 
   obstacles = obstacles.filter(
@@ -434,7 +514,7 @@ function update(delta) {
 
   updateProgress();
 
-  if (distance >= levelLength) {
+  if (distance >= level.length) {
     winGame();
   }
 }
@@ -460,6 +540,11 @@ function gameLoop(time) {
 
 /* ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ */
 
+function openLevelSelect() {
+  buildLevelList();
+  show($("levelPanel"));
+}
+
 function startGame() {
   stopLoop();
   hidePanels();
@@ -469,7 +554,6 @@ function startGame() {
 
   state = "playing";
 
-  // Canvas измеряется после появления игрового экрана.
   resizeCanvas();
   resetGame();
 
@@ -539,7 +623,15 @@ document.addEventListener("fullscreenchange", () => {
 
 /* КНОПКИ МЕНЮ */
 
-$("playButton").addEventListener("click", startGame);
+$("playButton").addEventListener("click", openLevelSelect);
+
+$("editorButton").addEventListener("click", () => {
+  toast("Редактор уровней появится в будущей обнове!");
+});
+
+$("closeLevelsButton").addEventListener("click", () => {
+  hide($("levelPanel"));
+});
 
 $("skinButton").addEventListener("click", () => {
   show($("skinPanel"));
@@ -566,7 +658,6 @@ function openSettings() {
   show($("settingsPanel"));
 }
 
-$("settingsButton").addEventListener("click", openSettings);
 $("settingsButtonBottom").addEventListener("click", openSettings);
 
 $("closeSettingsButton").addEventListener("click", () => {
@@ -583,10 +674,6 @@ $("soundButton").addEventListener("click", () => {
   if (soundEnabled) playTone(600, 0.07);
 });
 
-$("musicButton").addEventListener("click", () => {
-  toast("Музыку добавим в следующем обновлении!");
-});
-
 $("achievementsButton").addEventListener("click", () => {
   toast("Достижения появятся позже!");
 });
@@ -597,10 +684,6 @@ $("statsButton").addEventListener("click", () => {
 
 $("moreGamesButton").addEventListener("click", () => {
   toast("Другие игры Dima скоро появятся!");
-});
-
-$("closeMenuButton").addEventListener("click", () => {
-  toast("Это главное меню Dima Dash!");
 });
 
 /* КНОПКИ ИГРЫ */
@@ -616,6 +699,16 @@ $("winRetryButton").addEventListener("click", startGame);
 $("homePauseButton").addEventListener("click", goHome);
 $("homeDeadButton").addEventListener("click", goHome);
 $("homeWinButton").addEventListener("click", goHome);
+
+$("nextLevelButton").addEventListener("click", () => {
+  if (selectedLevel < levels.length - 1) {
+    selectedLevel++;
+    startGame();
+  } else {
+    toast("Ты дошёл до конца списка уровней!");
+    goHome();
+  }
+});
 
 /* УПРАВЛЕНИЕ */
 
@@ -670,8 +763,11 @@ function startLoading() {
   }, 90);
 }
 
+/* ПЕРВЫЙ ЗАПУСК */
+
 hide(mainMenu);
 hide(gameScreen);
 hidePanels();
 show(loadingScreen, "flex");
+
 startLoading();
