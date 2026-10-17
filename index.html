@@ -5,27 +5,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta name="theme-color" content="#c90035">
-  <title>Dima Dash</title>
+  <title>Geometry Dash — Dima</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- ЗАГРУЗОЧНЫЙ ЭКРАН -->
+  <!-- ЗАГРУЗКА -->
   <section id="loadingScreen" class="loading-screen">
     <div class="brand">Dima</div>
     <h1 class="loading-title">GEOMETRY DASH</h1>
-
     <div class="loading-track">
       <div id="loadingBar" class="loading-fill"></div>
     </div>
-
     <p id="loadingPercent">0%</p>
     <p class="loading-tip">WHAT IF THE SPIKES ARE THE GOOD GUYS?</p>
   </section>
 
   <!-- ГЛАВНОЕ МЕНЮ -->
   <main id="mainMenu" class="main-menu hidden">
-    <button id="closeMenuButton" class="close-menu" aria-label="Закрыть меню">✕</button>
-
     <h1 class="game-logo">GEOMETRY DASH</h1>
 
     <div class="main-buttons">
@@ -34,41 +30,50 @@
       </button>
 
       <button id="playButton" class="icon-button play-icon" aria-label="Играть">
-        <span>▶</span>
+        ▶
       </button>
 
-      <button id="settingsButton" class="icon-button" aria-label="Настройки">
-        <span class="tools-icon">⚒</span>
+      <button id="editorButton" class="icon-button editor-icon" aria-label="Редактор уровней — скоро">
+        ⚒
+        <small>СКОРО</small>
       </button>
     </div>
+
+    <p class="menu-subtitle">ПРЫГАЙ • ЛЕТИ • НЕ СТОЛКНИСЬ!</p>
 
     <div class="bottom-menu">
       <div class="left-links">
         <div class="social-icons">
-          <span class="social facebook">f</span>
-          <span class="social twitter">♥</span>
-          <span class="social youtube">▶</span>
-          <span class="social twitch">▣</span>
+          <span class="social">f</span>
+          <span class="social">♥</span>
+          <span class="social">▶</span>
         </div>
-
         <div class="dima-brand">Dima</div>
-        <div class="discord-icon">◉</div>
       </div>
 
       <div class="center-links">
         <button class="round-button" id="achievementsButton" aria-label="Достижения">🏆</button>
         <button class="round-button" id="settingsButtonBottom" aria-label="Настройки">⚙</button>
         <button class="round-button" id="statsButton" aria-label="Статистика">▥</button>
-        <button class="round-button" id="musicButton" aria-label="Музыка">♫</button>
       </div>
 
-      <button id="moreGamesButton" class="more-games">
-        MORE<br>GAMES
-      </button>
+      <button id="moreGamesButton" class="more-games">MORE<br>GAMES</button>
     </div>
 
-    <div class="menu-version">DIMA DASH • FAN GAME</div>
+    <div class="menu-version">DIMA • FAN GAME</div>
   </main>
+
+  <!-- ВЫБОР УРОВНЯ -->
+  <section id="levelPanel" class="popup hidden">
+    <div class="popup-card level-card">
+      <h2>ВЫБОР УРОВНЯ</h2>
+      <p>Выбери уровень для прохождения</p>
+
+      <div id="levelList" class="level-list"></div>
+
+      <button id="closeLevelsButton" class="popup-button">НАЗАД</button>
+    </div>
+  </section>
 
   <!-- ИГРА -->
   <section id="gameScreen" class="game-screen hidden">
@@ -76,28 +81,35 @@
 
     <div class="game-top">
       <button id="homeButton" class="game-button">⌂ МЕНЮ</button>
+
       <div class="game-progress">
-        <div class="progress-outer"><div id="progressBar"></div></div>
+        <div class="progress-outer">
+          <div id="progressBar"></div>
+        </div>
         <span id="progressText">0%</span>
+        <span id="levelNameHUD">STEREO MADNESS</span>
       </div>
+
       <button id="pauseButton" class="game-button">Ⅱ</button>
     </div>
 
-    <div class="game-hint">ПРОБЕЛ / НАЖМИ НА ЭКРАН, ЧТОБЫ ПРЫГНУТЬ</div>
+    <div class="game-hint">ПРОБЕЛ / ↑ / W ИЛИ НАЖМИ НА ЭКРАН, ЧТОБЫ ПРЫГНУТЬ</div>
   </section>
 
   <!-- ВЫБОР СКИНА -->
   <section id="skinPanel" class="popup hidden">
     <div class="popup-card">
       <h2>ВЫБОР КУБИКА</h2>
-      <p>Выбери цвет своего персонажа</p>
+      <p>Выбери цвет персонажа</p>
+
       <div class="skin-list">
-        <button class="skin-choice selected" data-color="#b7ff35" style="--skin:#b7ff35"></button>
-        <button class="skin-choice" data-color="#00eaff" style="--skin:#00eaff"></button>
-        <button class="skin-choice" data-color="#ff4b91" style="--skin:#ff4b91"></button>
-        <button class="skin-choice" data-color="#ffcc33" style="--skin:#ffcc33"></button>
-        <button class="skin-choice" data-color="#b16cff" style="--skin:#b16cff"></button>
+        <button class="skin-choice selected" data-color="#b7ff35" style="--skin:#b7ff35" aria-label="Зелёный"></button>
+        <button class="skin-choice" data-color="#00eaff" style="--skin:#00eaff" aria-label="Голубой"></button>
+        <button class="skin-choice" data-color="#ff4b91" style="--skin:#ff4b91" aria-label="Розовый"></button>
+        <button class="skin-choice" data-color="#ffcc33" style="--skin:#ffcc33" aria-label="Жёлтый"></button>
+        <button class="skin-choice" data-color="#b16cff" style="--skin:#b16cff" aria-label="Фиолетовый"></button>
       </div>
+
       <button id="closeSkinButton" class="popup-button">ГОТОВО</button>
     </div>
   </section>
@@ -126,7 +138,7 @@
   <section id="deadPanel" class="popup hidden">
     <div class="popup-card">
       <h2 class="red-title">СТОЛКНОВЕНИЕ!</h2>
-      <p>Попробуй ещё раз, легенда!</p>
+      <p>Попробуй ещё раз!</p>
       <button id="retryButton" class="popup-button green-button">↻ ЕЩЁ РАЗ</button>
       <button id="homeDeadButton" class="popup-button">⌂ В МЕНЮ</button>
     </div>
@@ -136,13 +148,13 @@
   <section id="winPanel" class="popup hidden">
     <div class="popup-card">
       <h2 class="green-title">УРОВЕНЬ ПРОЙДЕН!</h2>
-      <p>ЛЕГЕНДА DIMA DASH! 💀</p>
-      <button id="winRetryButton" class="popup-button green-button">↻ ЕЩЁ РАЗ</button>
+      <p id="winLevelText">Молодец!</p>
+      <button id="nextLevelButton" class="popup-button green-button">▶ СЛЕДУЮЩИЙ УРОВЕНЬ</button>
+      <button id="winRetryButton" class="popup-button">↻ ЕЩЁ РАЗ</button>
       <button id="homeWinButton" class="popup-button">⌂ В МЕНЮ</button>
     </div>
   </section>
 
-  <!-- УВЕДОМЛЕНИЯ -->
   <div id="toast" class="toast hidden"></div>
 
   <script src="script.js"></script>
