@@ -1,69 +1,93 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#263f83">
-  <meta name="description" content="Классический геометрический платформер в духе Geometry Dash.">
-  <title>GEOMETRY DASH</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#263d83">
+  <meta name="description" content="DASH DIMENSION — ритм-платформер с кубиками, уровнями и редакторским стилем.">
+  <title>DASH DIMENSION</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="app">
+  <div class="app" id="app">
     <header class="topbar">
-      <div class="brand-mark" aria-hidden="true">GD</div>
-      <div class="brand-copy">
-        <h1>GEOMETRY DASH</h1>
-        <p>JUMP • FLY • SURVIVE</p>
+      <button class="brand" data-screen="home" aria-label="Главное меню"><span class="brand-cube">D</span><span>DASH<br><b>DIMENSION</b></span></button>
+      <div class="top-actions">
+        <div class="currency"><span>◆</span><b id="coinCount">0</b></div>
+        <button class="square-btn" id="fullscreenBtn" aria-label="Полный экран" title="Полный экран">⛶</button>
+        <button class="square-btn" id="soundBtn" aria-label="Звук">♫</button>
       </div>
-      <button class="sound-button" id="soundButton" type="button" aria-label="Включить или выключить звук">♫</button>
     </header>
 
-    <section class="game-shell" aria-label="Игровое поле">
-      <div class="game-hud">
-        <span id="levelLabel">STEREO MADNESS</span>
-        <span id="percentLabel">0%</span>
-      </div>
-      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-      <canvas id="gameCanvas" width="960" height="540" aria-label="Игровое поле Geometry Dash"></canvas>
-
-      <div class="screen-layer" id="menuScreen">
-        <div class="screen-card">
-          <div class="mini-cube" aria-hidden="true"><span></span></div>
-          <p class="eyebrow">WELCOME TO</p>
-          <h2>GEOMETRY<br><strong>DASH</strong></h2>
-          <p class="screen-description">Прыгай через препятствия и доберись до финиша!</p>
-          <button class="main-button" id="playButton" type="button">ИГРАТЬ <span>▶</span></button>
-          <div class="menu-foot">УРОВЕНЬ 1 · STEREO MADNESS</div>
+    <main>
+      <section class="screen active" id="homeScreen">
+        <div class="home-stage">
+          <div class="stage-sun"></div><div class="stage-grid"></div>
+          <div class="floating-cube cube-a"></div><div class="floating-cube cube-b"></div>
+          <div class="logo-wrap"><div class="logo-kicker">A RHYTHM PLATFORMER</div><h1>DASH<br><span>DIMENSION</span></h1><div class="logo-line"></div></div>
+          <div class="home-cube-preview" id="homeCubePreview"><span></span><i></i></div>
+          <button class="play-button" id="quickPlay"><span>▶</span></button>
+          <div class="play-caption">НАЧАТЬ ИГРУ</div>
         </div>
-      </div>
+        <nav class="main-nav">
+          <button class="nav-tile" data-screen="levels"><span class="nav-icon">▦</span><b>УРОВНИ</b><small>Выбор этапа</small></button>
+          <button class="nav-tile" data-screen="icons"><span class="nav-icon">◈</span><b>ИКОНКИ</b><small>Твой персонаж</small></button>
+          <button class="nav-tile" data-screen="stats"><span class="nav-icon">★</span><b>СТАТИСТИКА</b><small>Твои рекорды</small></button>
+          <button class="nav-tile" data-screen="settings"><span class="nav-icon">⚙</span><b>НАСТРОЙКИ</b><small>Звук и игра</small></button>
+        </nav>
+        <div class="home-footer"><span>ВЕРСИЯ 2.0</span><span>MAKE EVERY JUMP COUNT</span><span>OFFLINE READY</span></div>
+      </section>
 
-      <div class="screen-layer hidden" id="resultScreen">
-        <div class="screen-card result-card">
-          <p class="eyebrow" id="resultEyebrow">LEVEL FAILED</p>
-          <h2 id="resultTitle">ПОПРОБУЙ<br><strong>ЕЩЁ РАЗ!</strong></h2>
-          <p class="screen-description" id="resultDescription">Каждая попытка приближает к победе.</p>
-          <div class="result-stats"><span>ПРОГРЕСС</span><strong id="resultPercent">0%</strong></div>
-          <button class="main-button" id="retryButton" type="button">ПОВТОРИТЬ <span>↻</span></button>
-          <button class="text-button" id="menuButton" type="button">В ГЛАВНОЕ МЕНЮ</button>
+      <section class="screen sub-screen" id="levelsScreen">
+        <div class="section-heading"><div><p class="eyebrow">CAMPAIGN</p><h2>ВЫБОР УРОВНЯ</h2></div><button class="back-btn" data-screen="home">← МЕНЮ</button></div>
+        <div class="level-list" id="levelList"></div>
+      </section>
+
+      <section class="screen sub-screen" id="iconsScreen">
+        <div class="section-heading"><div><p class="eyebrow">ICON KIT</p><h2>ТВОЙ КУБИК</h2></div><button class="back-btn" data-screen="home">← МЕНЮ</button></div>
+        <div class="icon-customizer">
+          <div class="icon-preview-panel"><div class="preview-label">ПРЕДПРОСМОТР</div><div class="big-icon" id="bigIcon"><span></span><i></i></div><div class="selected-name" id="selectedIconName">CLASSIC</div></div>
+          <div class="custom-options">
+            <div class="option-title">ВЫБЕРИ ИКОНКУ</div><div class="icon-grid" id="iconGrid"></div>
+            <div class="option-title">ОСНОВНОЙ ЦВЕТ</div><div class="color-grid" id="primaryColors"></div>
+            <div class="option-title">ВТОРОЙ ЦВЕТ</div><div class="color-grid" id="secondaryColors"></div>
+            <button class="confirm-btn" id="saveIcon">СОХРАНИТЬ ВЫБОР ✓</button>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <button class="pause-button hidden" id="pauseButton" type="button" aria-label="Пауза">Ⅱ</button>
-      <div class="pause-overlay hidden" id="pauseOverlay">
-        <div class="pause-card">
-          <h2>ПАУЗА</h2>
-          <button class="main-button" id="resumeButton" type="button">ПРОДОЛЖИТЬ</button>
-          <button class="text-button" id="pauseMenuButton" type="button">В МЕНЮ</button>
+      <section class="screen sub-screen" id="statsScreen">
+        <div class="section-heading"><div><p class="eyebrow">PLAYER PROFILE</p><h2>СТАТИСТИКА</h2></div><button class="back-btn" data-screen="home">← МЕНЮ</button></div>
+        <div class="stats-grid">
+          <article class="stat-card"><span>ЗВЁЗДЫ</span><b id="statStars">0</b><small>за пройденные уровни</small></article>
+          <article class="stat-card"><span>МОНЕТЫ</span><b id="statCoins">0</b><small>собрано на уровнях</small></article>
+          <article class="stat-card"><span>ПОПЫТКИ</span><b id="statAttempts">0</b><small>всего запусков</small></article>
+          <article class="stat-card"><span>ПРОЙДЕНО</span><b id="statCompleted">0/10</b><small>уровней кампании</small></article>
         </div>
-      </div>
-    </section>
+        <p class="info-note">Результаты сохраняются в памяти браузера на этом устройстве.</p>
+      </section>
 
-    <footer class="bottom-info">
-      <span>НАЖМИ / ПРОБЕЛ — ПРЫЖОК</span>
-      <span class="best-score">ЛУЧШИЙ РЕЗУЛЬТАТ: <b id="bestLabel">0%</b></span>
-    </footer>
-  </main>
+      <section class="screen sub-screen" id="settingsScreen">
+        <div class="section-heading"><div><p class="eyebrow">PREFERENCES</p><h2>НАСТРОЙКИ</h2></div><button class="back-btn" data-screen="home">← МЕНЮ</button></div>
+        <div class="settings-panel">
+          <label class="setting-row"><span><b>Звуковые эффекты</b><small>Звуки прыжков и столкновений</small></span><input type="checkbox" id="effectsToggle" checked><i class="toggle"></i></label>
+          <label class="setting-row"><span><b>Вибрация</b><small>Короткий отклик на столкновение</small></span><input type="checkbox" id="vibrationToggle" checked><i class="toggle"></i></label>
+          <label class="setting-row"><span><b>Показать подсказки</b><small>Напоминание об управлении</small></span><input type="checkbox" id="hintsToggle" checked><i class="toggle"></i></label>
+          <div class="setting-row"><span><b>Сложность</b><small>Влияет на скорость игры</small></span><select id="difficultySelect"><option value="normal">Обычная</option><option value="relaxed">Спокойная</option><option value="fast">Быстрая</option></select></div>
+          <button class="reset-btn" id="resetData">СБРОСИТЬ ПРОГРЕСС</button>
+        </div>
+      </section>
+
+      <section class="screen game-screen" id="gameScreen">
+        <div class="game-topline"><div><b id="gameLevelName">STEREO START</b><small id="attemptLabel">ПОПЫТКА 1</small></div><div class="game-top-actions"><button id="gameFullscreen" title="Полный экран">⛶</button><button id="pauseBtn" title="Пауза">Ⅱ</button></div></div>
+        <div class="game-progress"><div id="gameProgressFill"></div></div>
+        <div class="canvas-wrap" id="canvasWrap"><canvas id="gameCanvas" width="960" height="540"></canvas><div class="game-message" id="gameMessage">НАЖМИ, ЧТОБЫ ПРЫГНУТЬ</div></div>
+        <div class="game-bottomline"><span id="gamePercent">0%</span><span>ТАП / ПРОБЕЛ / ↑ — ПРЫЖОК</span><span id="gameCoins">◆ 0</span></div>
+        <div class="game-overlay hidden" id="pauseOverlay"><div class="overlay-card"><p class="eyebrow">TAKE A BREAK</p><h2>ПАУЗА</h2><button class="confirm-btn" id="resumeBtn">ПРОДОЛЖИТЬ</button><button class="secondary-btn" id="restartBtn">НАЧАТЬ ЗАНОВО</button><button class="secondary-btn" id="quitBtn">ВЫЙТИ К УРОВНЯМ</button></div></div>
+        <div class="game-overlay hidden" id="resultOverlay"><div class="overlay-card"><p class="eyebrow" id="resultEyebrow">LEVEL COMPLETE</p><h2 id="resultTitle">ПОБЕДА!</h2><div class="result-percent" id="resultPercent">100%</div><p id="resultText">Отличный забег!</p><div class="reward-row" id="rewardRow">★ +1　 ◆ +5</div><button class="confirm-btn" id="nextLevelBtn">СЛЕДУЮЩИЙ УРОВЕНЬ</button><button class="secondary-btn" id="retryLevelBtn">ЕЩЁ РАЗ</button><button class="secondary-btn" id="resultLevelsBtn">К ВЫБОРУ УРОВНЕЙ</button></div></div>
+      </section>
+    </main>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
