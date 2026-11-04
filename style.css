@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Russo+One&display=swap');
+
+:root {
+  --ink: #17264b;
+  --blue: #263f83;
+  --blue-dark: #192c62;
+  --cream: #fff3d2;
+  --gold: #ffd34e;
+  --green: #8bcf55;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  color: white;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.055) 25%, transparent 25%) 0 0/42px 42px,
+    linear-gradient(315deg, rgba(0,0,0,.08) 25%, transparent 25%) 0 0/42px 42px,
+    #182c62;
+  font-family: 'Chakra Petch', Arial, sans-serif;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; cursor: pointer; }
+.app { width: min(100%, 1040px); }
+.topbar {
+  display: flex; align-items: center; gap: 13px;
+  margin: 0 auto 14px; max-width: 960px;
+}
+.brand-mark {
+  width: 52px; height: 52px; display: grid; place-items: center;
+  border: 4px solid #17264b; border-radius: 9px;
+  color: #17264b; background: #ffd34e;
+  box-shadow: 0 5px 0 #101d42; font: 28px 'Russo One', sans-serif;
+  transform: rotate(-4deg);
+}
+.brand-copy { flex: 1; }
+.brand-copy h1 { margin: 0; font: clamp(20px, 4vw, 30px) 'Russo One', sans-serif; letter-spacing: 1px; text-shadow: 2px 3px 0 #101d42; }
+.brand-copy p { margin: 3px 0 0; color: #cbd9ff; font-size: 10px; font-weight: 700; letter-spacing: 3px; }
+.sound-button {
+  width: 43px; height: 43px; border: 3px solid #17264b; border-radius: 9px;
+  color: #17264b; background: #fff3d2; box-shadow: 0 4px 0 #101d42;
+  font-size: 23px; font-weight: 700;
+}
+.sound-button.muted { opacity: .55; }
+.game-shell {
+  position: relative; overflow: hidden; width: 100%;
+  border: 6px solid #101d42; border-radius: 13px;
+  background: #75c8d7; box-shadow: 0 12px 0 rgba(7,16,43,.35), 0 22px 45px rgba(0,0,0,.22);
+}
+.game-hud {
+  position: absolute; z-index: 2; top: 12px; left: 17px; right: 17px;
+  display: flex; justify-content: space-between; align-items: center;
+  color: white; font: 13px 'Russo One', sans-serif;
+  text-shadow: 2px 2px 0 #17264b; pointer-events: none;
+}
+.progress-track {
+  position: absolute; z-index: 2; top: 34px; left: 17px; right: 17px;
+  height: 10px; overflow: hidden; border: 2px solid #17264b;
+  border-radius: 8px; background: rgba(15,31,73,.38); pointer-events: none;
+}
+.progress-fill { width: 0; height: 100%; background: #ffd34e; transition: width .08s linear; }
+canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #79c9d9; touch-action: none; }
+.screen-layer {
+  position: absolute; z-index: 4; inset: 0; display: grid; place-items: center;
+  padding: 20px; background: rgba(20,39,91,.27);
+}
+.hidden { display: none !important; }
+.screen-card, .pause-card {
+  width: min(100%, 370px); padding: 25px 27px 21px; text-align: center;
+  color: #17264b; background: #fff3d2;
+  border: 5px solid #17264b; border-radius: 12px;
+  box-shadow: 0 8px 0 #101d42, 0 14px 25px rgba(0,0,0,.2);
+}
+.mini-cube {
+  width: 48px; height: 48px; margin: 0 auto 9px; position: relative;
+  background: #f2a83b; border: 4px solid #17264b; border-radius: 5px;
+  box-shadow: inset -5px -5px 0 rgba(0,0,0,.12);
+  transform: rotate(-5deg);
+}
+.mini-cube:before, .mini-cube:after {
+  content: ''; position: absolute; top: 13px; width: 6px; height: 8px;
+  background: #17264b; border-radius: 1px;
+}
+.mini-cube:before { left: 9px; } .mini-cube:after { right: 9px; }
+.mini-cube span { position: absolute; width: 15px; height: 4px; bottom: 8px; left: 13px; background: #17264b; }
+.eyebrow { margin: 0 0 5px; color: #b66a25; font-size: 11px; font-weight: 700; letter-spacing: 4px; }
+.screen-card h2, .pause-card h2 {
+  margin: 0; color: #263f83; font: clamp(29px, 5vw, 42px)/.98 'Russo One', sans-serif;
+  letter-spacing: 1px; text-shadow: 2px 3px 0 #d8c99e;
+}
+.screen-card h2 strong { color: #e47735; }
+.screen-description { margin: 13px auto 17px; max-width: 270px; color: #53617a; font-size: 13px; font-weight: 600; }
+.main-button {
+  min-width: 190px; padding: 13px 22px; border: 4px solid #17264b; border-radius: 8px;
+  color: #17264b; background: #8bcf55; box-shadow: 0 5px 0 #477b35;
+  font: 19px 'Russo One', sans-serif; transition: transform .08s, box-shadow .08s;
+}
+.main-button span { margin-left: 9px; }
+.main-button:active { transform: translateY(4px); box-shadow: 0 1px 0 #477b35; }
+.menu-foot { margin-top: 18px; color: #8c8b7c; font-size: 9px; font-weight: 700; letter-spacing: 2px; }
+.pause-button {
+  position: absolute; z-index: 3; right: 15px; top: 55px; width: 38px; height: 36px;
+  border: 3px solid #17264b; border-radius: 7px; color: #17264b;
+  background: #fff3d2; font-size: 19px; font-weight: 900;
+}
+.pause-overlay {
+  position: absolute; z-index: 5; inset: 0; display: grid; place-items: center;
+  padding: 20px; background: rgba(14,28,67,.58);
+}
+.pause-card { width: min(100%, 300px); }
+.pause-card h2 { margin-bottom: 20px; }
+.text-button { display: block; margin: 14px auto 0; padding: 5px 8px; border: 0; color: #596783; background: transparent; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+.result-card .eyebrow { margin-bottom: 9px; }
+.result-stats { display: flex; justify-content: space-between; margin: 15px 4px; padding: 10px 12px; border: 2px solid #d7cba9; border-radius: 6px; color: #596783; font-size: 12px; font-weight: 700; }
+.result-stats strong { color: #263f83; font: 18px 'Russo One', sans-serif; }
+.bottom-info {
+  display: flex; justify-content: space-between; gap: 12px; max-width: 960px;
+  margin: 17px auto 0; color: #cbd9ff; font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+}
+.best-score b { color: #ffd34e; }
+@media (max-width: 600px) {
+  body { padding: 10px; align-content: center; }
+  .topbar { margin-bottom: 10px; }
+  .brand-mark { width: 43px; height: 43px; font-size: 23px; }
+  .brand-copy h1 { font-size: clamp(17px, 5vw, 23px); }
+  .brand-copy p { font-size: 8px; letter-spacing: 2px; }
+  .game-shell { border-width: 4px; }
+  .screen-layer { padding: 10px; }
+  .screen-card { padding: 13px 14px 12px; border-width: 3px; }
+  .mini-cube { width: 34px; height: 34px; margin-bottom: 5px; border-width: 3px; }
+  .mini-cube:before, .mini-cube:after { top: 9px; width: 4px; height: 6px; }
+  .mini-cube:before { left: 6px; } .mini-cube:after { right: 6px; }
+  .mini-cube span { width: 11px; height: 3px; bottom: 5px; left: 9px; }
+  .screen-card h2 { font-size: clamp(24px, 7vw, 34px); }
+  .screen-description { margin: 7px auto 9px; font-size: 10px; }
+  .main-button { min-width: 155px; padding: 8px 15px; font-size: 15px; border-width: 3px; }
+  .menu-foot { margin-top: 9px; font-size: 7px; }
+  .game-hud { top: 7px; left: 10px; right: 10px; font-size: 10px; }
+  .progress-track { top: 25px; left: 10px; right: 10px; height: 8px; }
+  .pause-button { top: 40px; right: 9px; width: 31px; height: 29px; font-size: 15px; }
+  .bottom-info { margin-top: 12px; font-size: 8px; letter-spacing: .4px; }
+}
+@media (max-height: 560px) and (orientation: landscape) {
+  body { padding: 6px 18px; }
+  .topbar { margin-bottom: 5px; }
+  .brand-mark { width: 34px; height: 34px; font-size: 18px; }
+  .brand-copy h1 { font-size: 19px; }
+  .brand-copy p { display: none; }
+  .bottom-info { margin-top: 7px; }
+  .screen-card { padding: 10px 16px; }
+  .mini-cube { display: none; }
+  .screen-description { margin: 6px auto; }
+  .menu-foot { margin-top: 7px; }
+}
