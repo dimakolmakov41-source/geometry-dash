@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#263f83">
+  <meta name="description" content="Классический геометрический платформер в духе Geometry Dash.">
+  <title>GEOMETRY DASH</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand-mark" aria-hidden="true">GD</div>
+      <div class="brand-copy">
+        <h1>GEOMETRY DASH</h1>
+        <p>JUMP • FLY • SURVIVE</p>
+      </div>
+      <button class="sound-button" id="soundButton" type="button" aria-label="Включить или выключить звук">♫</button>
+    </header>
+
+    <section class="game-shell" aria-label="Игровое поле">
+      <div class="game-hud">
+        <span id="levelLabel">STEREO MADNESS</span>
+        <span id="percentLabel">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <canvas id="gameCanvas" width="960" height="540" aria-label="Игровое поле Geometry Dash"></canvas>
+
+      <div class="screen-layer" id="menuScreen">
+        <div class="screen-card">
+          <div class="mini-cube" aria-hidden="true"><span></span></div>
+          <p class="eyebrow">WELCOME TO</p>
+          <h2>GEOMETRY<br><strong>DASH</strong></h2>
+          <p class="screen-description">Прыгай через препятствия и доберись до финиша!</p>
+          <button class="main-button" id="playButton" type="button">ИГРАТЬ <span>▶</span></button>
+          <div class="menu-foot">УРОВЕНЬ 1 · STEREO MADNESS</div>
+        </div>
+      </div>
+
+      <div class="screen-layer hidden" id="resultScreen">
+        <div class="screen-card result-card">
+          <p class="eyebrow" id="resultEyebrow">LEVEL FAILED</p>
+          <h2 id="resultTitle">ПОПРОБУЙ<br><strong>ЕЩЁ РАЗ!</strong></h2>
+          <p class="screen-description" id="resultDescription">Каждая попытка приближает к победе.</p>
+          <div class="result-stats"><span>ПРОГРЕСС</span><strong id="resultPercent">0%</strong></div>
+          <button class="main-button" id="retryButton" type="button">ПОВТОРИТЬ <span>↻</span></button>
+          <button class="text-button" id="menuButton" type="button">В ГЛАВНОЕ МЕНЮ</button>
+        </div>
+      </div>
+
+      <button class="pause-button hidden" id="pauseButton" type="button" aria-label="Пауза">Ⅱ</button>
+      <div class="pause-overlay hidden" id="pauseOverlay">
+        <div class="pause-card">
+          <h2>ПАУЗА</h2>
+          <button class="main-button" id="resumeButton" type="button">ПРОДОЛЖИТЬ</button>
+          <button class="text-button" id="pauseMenuButton" type="button">В МЕНЮ</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="bottom-info">
+      <span>НАЖМИ / ПРОБЕЛ — ПРЫЖОК</span>
+      <span class="best-score">ЛУЧШИЙ РЕЗУЛЬТАТ: <b id="bestLabel">0%</b></span>
+    </footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
