@@ -13,23 +13,19 @@
 <script>
 (function(){
   var CONFIG_URL="https://raw.githubusercontent.com/dimakolmakov41-source/neural-game676767/main/closeall.json";
-  function showPage(){document.documentElement.style.visibility="visible";}
+  function reveal(){document.documentElement.style.visibility="visible";}
   function showClosed(message){
-    document.body.innerHTML=""
-      +'<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:24px;background:radial-gradient(circle at top,#243b63,#080d18 65%);color:#fff;font-family:system-ui,Arial;text-align:center">'
-      +'<section style="max-width:620px;padding:34px 26px;border:1px solid #526b91;border-radius:22px;background:#101b2e;box-shadow:0 20px 70px #0008">'
-      +'<div style="font-size:48px;margin-bottom:16px">🔒</div>'
-      +'<h1 style="font-size:clamp(22px,5vw,34px);margin:0;line-height:1.35"></h1>'
-      +'<p style="color:#a9bbd4;margin:16px 0 0">Dima Studio</p>'
-      +'</section></main>';
+    document.body.innerHTML='<main style="min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box;background:radial-gradient(circle at top,#243b63,#080d18 65%);color:white;font-family:system-ui,Arial;text-align:center"><section style="max-width:620px;padding:34px 26px;border:1px solid #526b91;border-radius:22px;background:#101b2e"><div style="font-size:48px">🔒</div><h1 style="font-size:clamp(22px,5vw,34px)"></h1><p style="color:#a9bbd4">Dima Studio</p></section></main>';
     document.body.querySelector("h1").textContent=message||"Все проекты Dima studio были закрыты";
   }
   document.addEventListener("DOMContentLoaded",function(){
-    fetch(CONFIG_URL,{cache:"no-store"})
+    fetch(CONFIG_URL+"?v="+Date.now(),{cache:"no-store",headers:{"Cache-Control":"no-cache","Pragma":"no-cache"}})
       .then(function(response){if(!response.ok)throw new Error("closeall config unavailable");return response.json();})
-      .then(function(config){if(config&&config.closeAll===true){showClosed(config.message);}})
-      .catch(function(){})
-      .finally(showPage);
+      .then(function(config){
+        if(config && config.closeAll === true){showClosed(config.message);}
+      })
+      .catch(function(error){console.warn("Dima Studio closeall check failed:",error);})
+      .finally(reveal);
   });
 })();
 </script>
